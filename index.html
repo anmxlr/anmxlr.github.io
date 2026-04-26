@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Intro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+    <video class="bg-video" class="content" autoplay muted loop id="bg-video">
+    <source src="/src/assets/img/bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="text-container">
+        <div id="text" class="title"></div>
+        <a href="/src/components/login.html">
+            <button id="continueBtn" class="btn-small">Continue to login.</button>
+        </a>
+    </div>
+
+    <script>
+        const message = "Welcome to Github page of anmxlr, a passionate software developer and open-source enthusiast. Here, you'll find a collection of my projects, contributions, and collaborations in the world of technology. Feel free to explore my repositories, check out my code, and connect with me for any questions or collaborations. Happy coding!";
+        let index = 0;
+        const speed = 100;
+
+        function typeEffect() {
+            if (index < message.length) {
+                document.getElementById("text").innerHTML += message.charAt(index);
+                index++;
+                setTimeout(typeEffect, speed);
+            } else {
+                document.getElementById("continueBtn").style.display = "inline-block";
+            }
+        }
+        typeEffect();
+    </script>
+
+</body>
+
+</html>
