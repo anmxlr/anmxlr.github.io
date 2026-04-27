@@ -23,7 +23,6 @@ body {
   object-fit: cover;
   z-index: -1;
 }
-
 .container {
   position: relative;
   width: 380px;
