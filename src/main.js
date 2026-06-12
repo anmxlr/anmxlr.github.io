@@ -488,57 +488,45 @@ document.addEventListener('DOMContentLoaded', () => {
       const octx = offscreen.getContext('2d');
 
       const textString = 'Building AI, Products, and Other Cool Stuff.';
-      const isMobile = w <= 768;
-      let fontSize;
+      const shouldWrap = w < 768;
       let lines = [];
-      let lineHeight;
+      if (shouldWrap) {
+        lines = ["Building AI, Products,", "and Other Cool Stuff."];
+      } else {
+        lines = [textString];
+      }
+
+      const maxAllowedWidth = w * 0.92;
+      let fontSize = Math.min(w * 0.08, shouldWrap ? 42 : 100);
+      if (shouldWrap) {
+        fontSize = Math.min(w * 0.12, 42); // Allow slightly larger relative font size when wrapping
+      }
+      octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+
+      let maxLineWidth = 0;
+      lines.forEach(line => {
+        const lineW = octx.measureText(line).width;
+        if (lineW > maxLineWidth) {
+          maxLineWidth = lineW;
+        }
+      });
+
+      if (maxLineWidth > maxAllowedWidth) {
+        fontSize = fontSize * (maxAllowedWidth / maxLineWidth);
+        octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+      }
 
       octx.fillStyle = '#ffffff';
       octx.textAlign = 'center';
       octx.textBaseline = 'middle';
 
-      if (isMobile) {
-        // Larger font size on mobile by wrapping text into multiple lines
-        fontSize = Math.min(w * 0.075, 28);
-        octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-        lineHeight = fontSize * 1.3;
-        const maxWidth = w * 0.88;
+      const lineGap = fontSize * 0.25;
+      const totalHeight = lines.length * fontSize + (lines.length - 1) * lineGap;
+      const startY = (h - totalHeight) / 2 + fontSize / 2;
 
-        const words = textString.split(' ');
-        let line = '';
-        for (let n = 0; n < words.length; n++) {
-          let testLine = line + words[n] + ' ';
-          let metrics = octx.measureText(testLine);
-          let testWidth = metrics.width;
-          if (testWidth > maxWidth && n > 0) {
-            lines.push(line.trim());
-            line = words[n] + ' ';
-          } else {
-            line = testLine;
-          }
-        }
-        lines.push(line.trim());
-      } else {
-        // Single line behavior for desktop
-        fontSize = Math.min(w * 0.08, 100);
-        octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-        const textWidth = octx.measureText(textString).width;
-        const maxAllowedWidth = w * 0.92;
-
-        if (textWidth > maxAllowedWidth) {
-          fontSize = fontSize * (maxAllowedWidth / textWidth);
-          octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-        }
-        lines = [textString];
-        lineHeight = 0;
-      }
-
-      const L = lines.length;
-      const startY = h / 2 - ((L - 1) * lineHeight) / 2;
-
-      lines.forEach((lineText, idx) => {
-        const lineY = startY + idx * lineHeight;
-        octx.fillText(lineText, w / 2, lineY);
+      lines.forEach((line, index) => {
+        const y = startY + index * (fontSize + lineGap);
+        octx.fillText(line, w / 2, y);
       });
 
       const imgData = octx.getImageData(0, 0, w, h);
