@@ -487,22 +487,59 @@ document.addEventListener('DOMContentLoaded', () => {
       offscreen.height = h;
       const octx = offscreen.getContext('2d');
 
-      let fontSize = Math.min(w * 0.08, 100);
-      octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+      const textString = 'Building AI, Products, and Other Cool Stuff.';
+      const isMobile = w <= 768;
+      let fontSize;
+      let lines = [];
+      let lineHeight;
+
       octx.fillStyle = '#ffffff';
       octx.textAlign = 'center';
       octx.textBaseline = 'middle';
 
-      const textString = 'Building AI, Products, and Other Cool Stuff.';
-      let textWidth = octx.measureText(textString).width;
-      const maxAllowedWidth = w * 0.92;
-
-      if (textWidth > maxAllowedWidth) {
-        fontSize = fontSize * (maxAllowedWidth / textWidth);
+      if (isMobile) {
+        // Larger font size on mobile by wrapping text into multiple lines
+        fontSize = Math.min(w * 0.075, 28);
         octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+        lineHeight = fontSize * 1.3;
+        const maxWidth = w * 0.88;
+
+        const words = textString.split(' ');
+        let line = '';
+        for (let n = 0; n < words.length; n++) {
+          let testLine = line + words[n] + ' ';
+          let metrics = octx.measureText(testLine);
+          let testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            lines.push(line.trim());
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line.trim());
+      } else {
+        // Single line behavior for desktop
+        fontSize = Math.min(w * 0.08, 100);
+        octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+        const textWidth = octx.measureText(textString).width;
+        const maxAllowedWidth = w * 0.92;
+
+        if (textWidth > maxAllowedWidth) {
+          fontSize = fontSize * (maxAllowedWidth / textWidth);
+          octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+        }
+        lines = [textString];
+        lineHeight = 0;
       }
 
-      octx.fillText(textString, w / 2, h / 2);
+      const L = lines.length;
+      const startY = h / 2 - ((L - 1) * lineHeight) / 2;
+
+      lines.forEach((lineText, idx) => {
+        const lineY = startY + idx * lineHeight;
+        octx.fillText(lineText, w / 2, lineY);
+      });
 
       const imgData = octx.getImageData(0, 0, w, h);
       const data = imgData.data;
