@@ -9,9 +9,14 @@
   box-sizing: border-box;
 }
 
-::selection {
-  background-color: #d00000;
-  color: #000000;
+*::selection {
+  background-color: #d00000 !important;
+  color: #000000 !important;
+}
+
+*::-moz-selection {
+  background-color: #d00000 !important;
+  color: #000000 !important;
 }
 
 html {
@@ -592,8 +597,14 @@ body.scroll-locked {
 }
 
 .hero-subtitle::selection {
-  background-color: #000000;
-  color: rgba(255, 255, 255, 0.5);
+  background-color: #000000 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 1000;
+}
+
+.hero-subtitle::-moz-selection {
+  background-color: #000000 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
   font-weight: 1000;
 }
 
@@ -613,8 +624,13 @@ body.scroll-locked {
 }
 
 .hero-easter::selection {
-  background-color: #ff0000;
-  color: #000000;
+  background-color: #ff0000 !important;
+  color: #000000 !important;
+}
+
+.hero-easter::-moz-selection {
+  background-color: #ff0000 !important;
+  color: #000000 !important;
 }
 
 .main-page.visible .hero-easter {

@@ -488,18 +488,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const octx = offscreen.getContext('2d');
 
       const textString = 'Building AI, Products, and Other Cool Stuff.';
-      const shouldWrap = w < 768;
       let lines = [];
-      if (shouldWrap) {
+      let shouldWrap = false;
+      let mobileStyle = false;
+
+      if (w < 480) {
+        // Very narrow screen (mobile portrait): split into 3 lines for max font size
+        lines = ["Building AI,", "Products, and", "Other Cool Stuff."];
+        shouldWrap = true;
+        mobileStyle = true;
+      } else if (w < 768) {
+        // Medium narrow screen (tablet portrait): split into 2 lines
         lines = ["Building AI, Products,", "and Other Cool Stuff."];
+        shouldWrap = true;
       } else {
         lines = [textString];
       }
 
-      const maxAllowedWidth = w * 0.92;
+      const maxAllowedWidth = w * (mobileStyle ? 0.96 : 0.92);
       let fontSize = Math.min(w * 0.08, shouldWrap ? 42 : 100);
-      if (shouldWrap) {
-        fontSize = Math.min(w * 0.12, 42); // Allow slightly larger relative font size when wrapping
+      if (mobileStyle) {
+        fontSize = Math.min(w * 0.16, 48); // Allow much larger relative font size when wrapping into 3 lines
+      } else if (shouldWrap) {
+        fontSize = Math.min(w * 0.12, 42); 
       }
       octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
 
@@ -532,14 +543,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const imgData = octx.getImageData(0, 0, w, h);
       const data = imgData.data;
 
-      const step = w > 768 ? 4 : 3;
+      // Increase pixel sampling density and particle size on mobile for high readability
+      const step = w > 768 ? 4 : (w < 480 ? 2 : 3);
+      const baseParticleSize = w > 768 ? 1.5 : (w < 480 ? 2.8 : 2.0);
+      const particleSizeVar = w > 768 ? 1.5 : (w < 480 ? 2.0 : 1.8);
 
       for (let y = 0; y < h; y += step) {
         for (let x = 0; x < w; x += step) {
           const index = (y * w + x) * 4;
           const alpha = data[index + 3];
           if (alpha > 128) {
-            const size = Math.random() * 1.5 + 1.5;
+            const size = Math.random() * particleSizeVar + baseParticleSize;
             particles.push(new WarpParticle(w, h, x, y, size));
           }
         }

@@ -1,12 +1,12 @@
 [
   {
     "id": "1",
-    "title": "Project Alpha",
+    "title": "Your Name on India-SAT",
     "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
     "tags": "HTML, CSS, Vanilla JS",
     "link": "https://github.com/anmxlr",
     "github": "https://github.com/anmxlr",
-    "image": "src/assets/images/iitb.png"
+    "image": "src/assets/images/projects/1.png"
   },
   {
     "id": "2",
@@ -16,5 +16,14 @@
     "link": "https://github.com/anmxlr",
     "github": "https://github.com/anmxlr",
     "image": "src/assets/images/iitb.png"
+  },
+  {
+    "id": "3",
+    "title": "Project Gamma",
+    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
+    "tags": "HTML, CSS, Vanilla JS",
+    "link": "https://github.com/anmxlr",
+    "github": "https://github.com/anmxlr",
+    "image": "src/assets/images/iitb.png"
   }
-]s
+]
