@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>anmxlr ™ — Admin Console</title>
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="icon" type="image/svg+xml" href="src/assets/images/logo.svg" />
+    <link rel="shortcut icon" href="src/assets/images/logo.svg" />
+    <style>
+        /* Custom styles for Admin Dashboard, extending portfolio aesthetic */
+        body {
+            background-color: #020202;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .admin-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 100px 24px 80px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 24px;
+            margin-bottom: 40px;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .admin-title span {
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.1rem;
+            margin-left: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form elements styling */
+        .admin-card {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-heading {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.02);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Image Drag & Drop */
+        .image-drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.01);
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-drop-zone:hover,
+        .image-drop-zone.dragover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .image-drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .drop-icon {
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .drop-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .image-preview-thumbnail {
+            width: 100%;
+            height: 100px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .remove-img-btn {
+            background: rgba(255, 50, 50, 0.1);
+            color: rgb(255, 80, 80);
+            border: 1px solid rgba(255, 50, 50, 0.2);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-img-btn:hover {
+            background: rgba(255, 50, 50, 0.25);
+            border-color: rgb(255, 80, 80);
+        }
+
+        /* Buttons styling */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            background: rgba(255, 50, 50, 0.1);
+            color: rgb(255, 80, 80);
+            border: 1px solid rgba(255, 50, 50, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgb(255, 50, 50);
+            color: #ffffff;
+            border-color: rgb(255, 50, 50);
+            box-shadow: 0 0 20px rgba(255, 50, 50, 0.2);
+        }
+
+        /* GH Configuration styling */
+        .gh-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .gh-badge.connected {
+            background: rgba(50, 255, 100, 0.1);
+            color: rgb(50, 255, 100);
+            border: 1px solid rgba(50, 255, 100, 0.2);
+        }
+
+        .gh-badge.disconnected {
+            background: rgba(255, 150, 50, 0.1);
+            color: rgb(255, 150, 50);
+            border: 1px solid rgba(255, 150, 50, 0.2);
+        }
+
+        /* Live Preview container */
+        .preview-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #111 0%, #050505 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 40px 20px;
+            min-height: 520px;
+        }
+
+        .preview-box project-card {
+            width: 320px;
+            height: 460px;
+        }
+
+        /* Projects List Styling */
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .project-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .project-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .project-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .project-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .project-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .project-item-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .project-item-desc {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            max-width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .small-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .small-btn:hover {
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .small-btn-danger {
+            background: rgba(255, 50, 50, 0.08);
+            border: 1px solid rgba(255, 50, 50, 0.2);
+            color: rgb(255, 100, 100);
+        }
+
+        .small-btn-danger:hover {
+            background: rgb(255, 50, 50);
+            color: #ffffff;
+            border-color: rgb(255, 50, 50);
+        }
+
+        /* Notifications & Log Area */
+        .status-banner {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 24px;
+            z-index: 1000;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            transform: translateY(150%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-banner.show {
+            transform: translateY(0);
+        }
+
+        .status-banner.success {
+            border-color: rgba(50, 255, 100, 0.3);
+        }
+
+        .status-banner.error {
+            border-color: rgba(255, 50, 50, 0.3);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffffff;
+        }
+
+        .success .status-indicator {
+            background: rgb(50, 255, 100);
+            box-shadow: 0 0 8px rgb(50, 255, 100);
+        }
+
+        .error .status-indicator {
+            background: rgb(255, 50, 50);
+            box-shadow: 0 0 8px rgb(255, 50, 50);
+        }
+
+        .status-msg {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Manual JSON Section */
+        .json-section {
+            margin-top: 40px;
+        }
+
+        .json-editor {
+            width: 100%;
+            height: 200px;
+            background: #050505;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 16px;
+            color: #a0a0a0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        /* Loader Animation */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-bar visible">
+        <div class="logo">
+            <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="logo-icon">
+            <span>anmxlr ™</span>
+        </div>
+        <a href="index.html" class="contact-btn">
+            <span>View Site</span>
+            <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </a>
+    </nav>
+
+    <div class="admin-container">
+
+        <div class="admin-header">
+            <div>
+                <h1 class="admin-title">Admin Console<span>Systematic Projects Manager</span></h1>
+            </div>
+            <a href="index.html" class="back-link">
+                ← Back to Portfolio
+            </a>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- LEFT COLUMN: Form & Project List -->
+            <div class="left-col">
+
+                <!-- Project Form Card -->
+                <div class="admin-card">
+                    <div class="card-heading">
+                        <span id="form-action-title">Add New Project</span>
+                        <span id="edit-indicator"
+                            style="display: none; font-size: 0.75rem; font-weight: 500; color: #ffffff; background: rgba(255, 255, 255, 0.08); padding: 4px 8px; border-radius: 4px;">Editing
+                            State</span>
+                    </div>
+
+                    <form id="project-form">
+                        <input type="hidden" id="project-id" value="">
+
+                        <div class="form-group">
+                            <label for="project-title">Project Title</label>
+                            <input type="text" id="project-title" required placeholder="e.g. Project Alpha">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="project-desc">Description</label>
+                            <textarea id="project-desc" required
+                                placeholder="Describe what the project does, technologies used, design constraints..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="project-tags">Tags (Comma-separated)</label>
+                            <input type="text" id="project-tags" required placeholder="e.g. HTML, CSS, Vanilla JS">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="project-link">View Project URL</label>
+                                <input type="url" id="project-link" placeholder="e.g. https://myproject.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="project-github">GitHub Repository URL</label>
+                                <input type="url" id="project-github"
+                                    placeholder="e.g. https://github.com/username/project">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Display Image</label>
+                            <div class="image-drop-zone" id="drop-zone">
+                                <span class="drop-icon">📁</span>
+                                <span class="drop-text">Drag & Drop project screenshot or click to browse</span>
+                                <input type="file" id="project-image" accept="image/*">
+                            </div>
+                            <div id="image-preview-area" style="display: none; margin-top: 15px;">
+                                <div class="image-preview-container">
+                                    <img id="image-preview-img" src="" class="image-preview-thumbnail" alt="Preview">
+                                    <button type="button" class="remove-img-btn" id="remove-preview-img">Remove
+                                        Image</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary" id="save-btn">
+                                <span>Add Project</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="clear-btn">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Projects List Card -->
+                <div class="admin-card">
+                    <div class="card-heading">
+                        Existing Projects
+                        <span style="font-size: 0.8rem; font-weight: 500; color: rgba(255, 255, 255, 0.4);"
+                            id="project-count">0 Projects</span>
+                    </div>
+
+                    <div class="project-list" id="project-list-container">
+                        <!-- Projects loaded dynamically -->
+                        <div style="padding: 20px; text-align: center; opacity: 0.5;">Loading projects database...</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: GitHub Settings & Live Preview -->
+            <div class="right-col">
+
+                <!-- GitHub Integration Setup -->
+                <div class="admin-card">
+                    <div class="card-heading">
+                        GitHub Integration
+                        <span id="conn-badge" class="gh-badge disconnected">Offline Mode</span>
+                    </div>
+                    <p
+                        style="font-size: 0.78rem; line-height: 1.5; color: rgba(255, 255, 255, 0.45); margin-bottom: 20px; margin-top: 0;">
+                        Link your dashboard directly to GitHub Pages. Saves updates and uploads images directly to your
+                        repository via commits. Requires a Personal Access Token (PAT).
+                    </p>
+
+                    <div class="form-group">
+                        <label for="gh-username">GitHub Username</label>
+                        <input type="text" id="gh-username" placeholder="e.g. anmxlr">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gh-repo">Repository Name</label>
+                        <input type="text" id="gh-repo" placeholder="e.g. anmxlr.github.io">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gh-token">Personal Access Token (classic or fine-grained)</label>
+                        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxx">
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-primary" id="gh-save-btn" style="width: 100%;">
+                            <span>Save & Connect</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="gh-disconnect-btn" style="display: none;">
+                            Disconnect
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Real-time Project Card Preview -->
+                <div class="admin-card">
+                    <div class="card-heading">Live Preview</div>
+                    <div class="preview-box">
+                        <project-card id="live-preview-card" title="Preview Title"
+                            description="Start typing in the form to see how your project card will render on the live portfolio website."
+                            tags="HTML, CSS, JS">
+                        </project-card>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Manual Save JSON and Database Export/Import -->
+        <div class="admin-card json-section">
+            <div class="card-heading">
+                Manual Projects Database Backup (Local Fallback)
+                <div>
+                    <button class="small-btn" id="copy-json-btn">Copy JSON</button>
+                    <button class="small-btn" id="download-json-btn">Download projects.json</button>
+                </div>
+            </div>
+            <p style="font-size: 0.78rem; line-height: 1.5; color: rgba(255, 255, 255, 0.45); margin: 0 0 12px 0;">
+                If you choose not to use GitHub API commits, you can copy the JSON content below and paste it into
+                <code>src/data/projects.json</code> manually, or download the file and overwrite it.
+            </p>
+            <textarea class="json-editor" id="json-editor" readonly></textarea>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div class="status-banner" id="status-banner">
+        <div class="status-indicator"></div>
+        <span class="status-msg" id="status-message">Action processed successfully</span>
+    </div>
+
+    <!-- Component Logic Load -->
+    <script src="src/components/project-card.js" defer></script>
+
+    <!-- Admin Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // UI elements
+            const projectForm = document.getElementById('project-form');
+            const projectIdInput = document.getElementById('project-id');
+            const projectTitleInput = document.getElementById('project-title');
+            const projectDescInput = document.getElementById('project-desc');
+            const projectTagsInput = document.getElementById('project-tags');
+            const projectLinkInput = document.getElementById('project-link');
+            const projectGithubInput = document.getElementById('project-github');
+            const projectImageFileInput = document.getElementById('project-image');
+
+            const dropZone = document.getElementById('drop-zone');
+            const imagePreviewArea = document.getElementById('image-preview-area');
+            const imagePreviewImg = document.getElementById('image-preview-img');
+            const removePreviewImg = document.getElementById('remove-preview-img');
+
+            const saveBtn = document.getElementById('save-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const formActionTitle = document.getElementById('form-action-title');
+            const editIndicator = document.getElementById('edit-indicator');
+            const projectCountText = document.getElementById('project-count');
+            const projectListContainer = document.getElementById('project-list-container');
+
+            const ghUsernameInput = document.getElementById('gh-username');
+            const ghRepoInput = document.getElementById('gh-repo');
+            const ghTokenInput = document.getElementById('gh-token');
+            const ghSaveBtn = document.getElementById('gh-save-btn');
+            const ghDisconnectBtn = document.getElementById('gh-disconnect-btn');
+            const connBadge = document.getElementById('conn-badge');
+
+            const jsonEditor = document.getElementById('json-editor');
+            const copyJsonBtn = document.getElementById('copy-json-btn');
+            const downloadJsonBtn = document.getElementById('download-json-btn');
+
+            const statusBanner = document.getElementById('status-banner');
+            const statusMessage = document.getElementById('status-message');
+
+            // Application State
+            let projects = [];
+            let imageBase64 = ''; // Base64 data of current upload (for API or local storage)
+            let imageFileName = ''; // Name of uploaded file
+            let editMode = false;
+            let currentProjId = '';
+
+            // GitHub configuration state
+            let githubConfig = {
+                username: '',
+                repo: '',
+                token: ''
+            };
+
+            // 1. Toast Notification Utility
+            function showNotification(message, type = 'success') {
+                statusMessage.textContent = message;
+                statusBanner.className = `status-banner show ${type}`;
+                setTimeout(() => {
+                    statusBanner.classList.remove('show');
+                }, 4000);
+            }
+
+            // 2. Load configuration from localStorage
+            function loadGitHubConfig() {
+                const configStr = localStorage.getItem('anmxlr_gh_config');
+                if (configStr) {
+                    try {
+                        githubConfig = JSON.parse(configStr);
+                        ghUsernameInput.value = githubConfig.username || '';
+                        ghRepoInput.value = githubConfig.repo || '';
+                        ghTokenInput.value = githubConfig.token || '';
+
+                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                            setConnectionStatus(true);
+                        } else {
+                            setConnectionStatus(false);
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse GH config from localStorage', e);
+                    }
+                }
+            }
+
+            function setConnectionStatus(isConnected) {
+                if (isConnected) {
+                    connBadge.textContent = 'GitHub Connected';
+                    connBadge.className = 'gh-badge connected';
+                    ghDisconnectBtn.style.display = 'block';
+                    ghSaveBtn.querySelector('span').textContent = 'Update Config';
+                } else {
+                    connBadge.textContent = 'Offline Mode';
+                    connBadge.className = 'gh-badge disconnected';
+                    ghDisconnectBtn.style.display = 'none';
+                    ghSaveBtn.querySelector('span').textContent = 'Save & Connect';
+                }
+            }
+
+            // Save GitHub config to localStorage
+            ghSaveBtn.addEventListener('click', () => {
+                const username = ghUsernameInput.value.trim();
+                const repo = ghRepoInput.value.trim();
+                const token = ghTokenInput.value.trim();
+
+                if (!username || !repo || !token) {
+                    showNotification('All GitHub config fields are required to connect.', 'error');
+                    return;
+                }
+
+                githubConfig = { username, repo, token };
+                localStorage.setItem('anmxlr_gh_config', JSON.stringify(githubConfig));
+                setConnectionStatus(true);
+                showNotification('GitHub credentials saved. Running in GitHub API mode.');
+
+                // Try to load projects from Github immediately to verify token
+                loadProjectsFromGitHub();
+            });
+
+            ghDisconnectBtn.addEventListener('click', () => {
+                localStorage.removeItem('anmxlr_gh_config');
+                githubConfig = { username: '', repo: '', token: '' };
+                ghUsernameInput.value = '';
+                ghRepoInput.value = '';
+                ghTokenInput.value = '';
+                setConnectionStatus(false);
+                showNotification('Disconnected from GitHub API. Form will export manually.');
+
+                // Reload projects locally
+                loadLocalProjects();
+            });
+
+            // 3. Load projects database
+            async function loadLocalProjects() {
+                try {
+                    const res = await fetch('src/data/projects.json');
+                    if (!res.ok) throw new Error('Local file not found');
+                    projects = await res.json();
+                    renderProjectsList();
+                    updateJSONBackupArea();
+                    showNotification('Loaded projects database locally.');
+                } catch (e) {
+                    console.error('Could not fetch projects locally', e);
+                    projects = [];
+                    renderProjectsList();
+                    updateJSONBackupArea();
+                }
+            }
+
+            async function loadProjectsFromGitHub() {
+                if (!githubConfig.token || !githubConfig.username || !githubConfig.repo) {
+                    loadLocalProjects();
+                    return;
+                }
+
+                try {
+                    const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/src/data/projects.json`;
+                    const res = await fetch(url, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (res.status === 404) {
+                        // File doesn't exist on GH yet, create empty or fallback to local
+                        showNotification('projects.json not found on GitHub repository. Initializing new list.', 'error');
+                        projects = [];
+                        renderProjectsList();
+                        updateJSONBackupArea();
+                        return;
+                    }
+
+                    if (!res.ok) throw new Error(`GitHub API returned status ${res.status}`);
+
+                    const fileData = await res.json();
+                    const contentStr = atob(fileData.content.replace(/\s/g, ''));
+                    projects = JSON.parse(contentStr);
+                    renderProjectsList();
+                    updateJSONBackupArea();
+                    showNotification('Fetched projects database directly from GitHub repo!');
+                } catch (e) {
+                    console.error('GitHub fetch failed, falling back to local files.', e);
+                    showNotification('GitHub Fetch Failed. Storing changes locally/manually.', 'error');
+                    loadLocalProjects();
+                }
+            }
+
+            // 4. Drag & Drop File Zone Actions
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleImageFile(file);
+                } else {
+                    showNotification('Please drop a valid image file.', 'error');
+                }
+            });
+
+            projectImageFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleImageFile(file);
+            });
+
+            function handleImageFile(file) {
+                imageFileName = file.name;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imageBase64 = event.target.result;
+                    imagePreviewImg.src = imageBase64;
+                    imagePreviewArea.style.display = 'block';
+                    dropZone.style.display = 'none';
+
+                    // Update preview card image
+                    updateLivePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            removePreviewImg.addEventListener('click', () => {
+                imageBase64 = '';
+                imageFileName = '';
+                projectImageFileInput.value = '';
+                imagePreviewArea.style.display = 'none';
+                dropZone.style.display = 'flex';
+
+                updateLivePreview();
+            });
+
+            // 5. Form inputs to Live Preview Card binding
+            function updateLivePreview() {
+                const title = projectTitleInput.value.trim() || 'Project Title';
+                const desc = projectDescInput.value.trim() || 'Start typing in the form to see how your project card will render on the live portfolio website.';
+                const tags = projectTagsInput.value.trim() || 'HTML, CSS, JS';
+
+                const previewBox = document.querySelector('.preview-box');
+                previewBox.innerHTML = '';
+
+                const card = document.createElement('project-card');
+                card.setAttribute('title', title);
+                card.setAttribute('description', desc);
+                card.setAttribute('tags', tags);
+
+                if (imageBase64) {
+                    card.setAttribute('image', imageBase64);
+                } else if (editMode) {
+                    const proj = projects.find(p => p.id === currentProjId);
+                    if (proj && proj.image) {
+                        card.setAttribute('image', proj.image);
+                    }
+                }
+
+                previewBox.appendChild(card);
+            }
+
+            projectTitleInput.addEventListener('input', updateLivePreview);
+            projectDescInput.addEventListener('input', updateLivePreview);
+            projectTagsInput.addEventListener('input', updateLivePreview);
+
+            // 6. Project actions: Save / Edit / Delete
+            projectForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = projectTitleInput.value.trim();
+                const description = projectDescInput.value.trim();
+                const tags = projectTagsInput.value.trim();
+                const link = projectLinkInput.value.trim() || '#';
+                const github = projectGithubInput.value.trim() || '';
+
+                if (!title || !description || !tags) {
+                    showNotification('Please fill in all required fields.', 'error');
+                    return;
+                }
+
+                // Show spinner loading inside save button
+                const originalBtnText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<div class="spinner"></div> <span>Processing...</span>`;
+
+                try {
+                    let imagePath = '';
+                    if (editMode) {
+                        const existingProj = projects.find(p => p.id === currentProjId);
+                        imagePath = existingProj ? existingProj.image : '';
+                    }
+
+                    // Handle uploading image to GitHub if connected
+                    if (imageBase64 && imageBase64.startsWith('data:image/') && githubConfig.token) {
+                        showNotification('Uploading image to GitHub repo...');
+                        const fileExt = imageFileName.split('.').pop() || 'png';
+                        const slugifiedTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        const imgPath = `src/assets/images/${slugifiedTitle}-${Date.now()}.${fileExt}`;
+
+                        // Strip metadata prefix for GitHub API commit
+                        const base64DataOnly = imageBase64.split(',')[1];
+
+                        const uploadResult = await commitToGitHub(imgPath, base64DataOnly, `Upload display picture for project: ${title}`);
+                        if (uploadResult) {
+                            imagePath = imgPath;
+                        } else {
+                            throw new Error('Image upload to GitHub failed');
+                        }
+                    } else if (imageBase64 && imageBase64.startsWith('data:image/')) {
+                        // In local/manual mode, we specify that they should save the image in assets directory
+                        // We will set its path to the local name they uploaded for tracking
+                        const fileExt = imageFileName.split('.').pop() || 'png';
+                        const slugifiedTitle = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        imagePath = `src/assets/images/${slugifiedTitle}.${fileExt}`;
+                        showNotification('Running manually. Make sure to download and place this image into src/assets/images/ folder.', 'error');
+                    }
+
+                    if (editMode) {
+                        // UPDATE EXISTING
+                        projects = projects.map(proj => {
+                            if (proj.id === currentProjId) {
+                                return {
+                                    id: currentProjId,
+                                    title,
+                                    description,
+                                    tags,
+                                    link,
+                                    github,
+                                    image: imagePath
+                                };
+                            }
+                            return proj;
+                        });
+                        showNotification('Updated project locally.');
+                    } else {
+                        // ADD NEW
+                        const newProj = {
+                            id: Date.now().toString(),
+                            title,
+                            description,
+                            tags,
+                            link,
+                            github,
+                            image: imagePath
+                        };
+                        projects.push(newProj);
+                        showNotification('Created project locally.');
+                    }
+
+                    // Save projects database (GitHub commit or Local write output)
+                    if (githubConfig.token && githubConfig.username && githubConfig.repo) {
+                        showNotification('Saving projects database to GitHub...');
+                        const jsonStr = JSON.stringify(projects, null, 2);
+                        const base64Json = btoa(unescape(encodeURIComponent(jsonStr)));
+
+                        // Get SHA of current src/data/projects.json first
+                        const sha = await getGitHubFileSha('src/data/projects.json');
+                        await commitToGitHub('src/data/projects.json', base64Json, `Update projects database`, sha);
+                        showNotification('Projects successfully updated and pushed to GitHub Pages!');
+                        loadProjectsFromGitHub();
+                    } else {
+                        // Manual mode
+                        updateJSONBackupArea();
+                        renderProjectsList();
+                    }
+
+                    // Reset Form
+                    resetForm();
+
+                } catch (err) {
+                    console.error(err);
+                    showNotification(`Failed to save: ${err.message}`, 'error');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnText;
+                }
+            });
+
+            function resetForm() {
+                projectForm.reset();
+                projectIdInput.value = '';
+                editMode = false;
+                currentProjId = '';
+                imageBase64 = '';
+                imageFileName = '';
+                projectImageFileInput.value = '';
+                imagePreviewArea.style.display = 'none';
+                dropZone.style.display = 'flex';
+                formActionTitle.textContent = 'Add New Project';
+                editIndicator.style.display = 'none';
+                saveBtn.querySelector('span').textContent = 'Add Project';
+
+                updateLivePreview();
+            }
+
+            clearBtn.addEventListener('click', resetForm);
+
+            // 7. GitHub API Helper Actions
+            async function getGitHubFileSha(path) {
+                const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${path}`;
+                try {
+                    const res = await fetch(url, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    if (res.status === 200) {
+                        const data = await res.json();
+                        return data.sha;
+                    }
+                    return null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            async function commitToGitHub(path, base64Content, commitMessage, sha = null) {
+                const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${path}`;
+                const body = {
+                    message: commitMessage,
+                    content: base64Content
+                };
+                if (sha) body.sha = sha;
+
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const errRes = await res.json();
+                    throw new Error(errRes.message || 'Commit failed');
+                }
+
+                return true;
+            }
+
+            // 8. Render List in UI
+            function renderProjectsList() {
+                projectCountText.textContent = `${projects.length} Project${projects.length === 1 ? '' : 's'}`;
+
+                if (projects.length === 0) {
+                    projectListContainer.innerHTML = `<div style="padding: 30px; text-align: center; opacity: 0.4; font-size: 0.85rem;">No projects added yet. Add your first project using the form.</div>`;
+                    return;
+                }
+
+                projectListContainer.innerHTML = '';
+                projects.forEach(proj => {
+                    const item = document.createElement('div');
+                    item.className = 'project-item';
+
+                    item.innerHTML = `
+                        <div class="project-item-info">
+                            <span class="project-item-title">${proj.title}</span>
+                            <span class="project-item-desc">${proj.description}</span>
+                        </div>
+                        <div class="project-item-actions">
+                            <button class="small-btn" onclick="editProjectInForm('${proj.id}')">Edit</button>
+                            <button class="small-btn small-btn-danger" onclick="deleteProjectConfirmation('${proj.id}')">Delete</button>
+                        </div>
+                    `;
+                    projectListContainer.appendChild(item);
+                });
+            }
+
+            // Bind global triggers for Edit & Delete since elements are dynamically added
+            window.editProjectInForm = (id) => {
+                const proj = projects.find(p => p.id === id);
+                if (!proj) return;
+
+                editMode = true;
+                currentProjId = id;
+                projectIdInput.value = id;
+                projectTitleInput.value = proj.title;
+                projectDescInput.value = proj.description;
+                projectTagsInput.value = proj.tags;
+                projectLinkInput.value = proj.link === '#' ? '' : proj.link;
+                projectGithubInput.value = proj.github;
+
+                formActionTitle.textContent = `Edit Project`;
+                editIndicator.style.display = 'inline-block';
+                saveBtn.querySelector('span').textContent = 'Save Changes';
+
+                if (proj.image) {
+                    imagePreviewImg.src = proj.image;
+                    imagePreviewArea.style.display = 'block';
+                    dropZone.style.display = 'none';
+                } else {
+                    imagePreviewArea.style.display = 'none';
+                    dropZone.style.display = 'flex';
+                }
+
+                updateLivePreview();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showNotification(`Loaded "${proj.title}" in form.`);
+            };
+
+            window.deleteProjectConfirmation = async (id) => {
+                const proj = projects.find(p => p.id === id);
+                if (!proj) return;
+
+                if (confirm(`Are you sure you want to delete project: "${proj.title}"?`)) {
+                    projects = projects.filter(p => p.id !== id);
+                    showNotification(`Project "${proj.title}" deleted locally.`);
+
+                    if (githubConfig.token && githubConfig.username && githubConfig.repo) {
+                        showNotification('Updating database on GitHub...');
+                        try {
+                            const jsonStr = JSON.stringify(projects, null, 2);
+                            const base64Json = btoa(unescape(encodeURIComponent(jsonStr)));
+                            const sha = await getGitHubFileSha('src/data/projects.json');
+                            await commitToGitHub('src/data/projects.json', base64Json, `Delete project: ${proj.title}`, sha);
+                            showNotification('Project successfully deleted from GitHub repo.');
+                            loadProjectsFromGitHub();
+                        } catch (err) {
+                            showNotification(`Failed to save to GitHub: ${err.message}`, 'error');
+                            renderProjectsList();
+                            updateJSONBackupArea();
+                        }
+                    } else {
+                        renderProjectsList();
+                        updateJSONBackupArea();
+                    }
+                }
+            };
+
+            // 9. Manual Export Utility
+            function updateJSONBackupArea() {
+                jsonEditor.value = JSON.stringify(projects, null, 2);
+            }
+
+            copyJsonBtn.addEventListener('click', () => {
+                jsonEditor.select();
+                navigator.clipboard.writeText(jsonEditor.value);
+                showNotification('JSON copied to clipboard!');
+            });
+
+            downloadJsonBtn.addEventListener('click', () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonEditor.value);
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", "projects.json");
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                showNotification('Downloaded projects.json successfully.');
+            });
+
+            // 10. Initialization trigger
+            loadGitHubConfig();
+            if (githubConfig.token) {
+                loadProjectsFromGitHub();
+            } else {
+                loadLocalProjects();
+            }
+        });
+    </script>
+</body>
+
+</html>

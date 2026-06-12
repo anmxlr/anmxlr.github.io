@@ -1,19 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-locked">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="anmxlr — personal landing page">
     <title>anmxlr</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="icon" type="image/svg+xml" href="src/assets/images/logo.svg" />
+    <link rel="shortcut icon" href="src/assets/images/logo.svg" />
 </head>
 
-<body>
+<body class="scroll-locked">
 
     <!-- ── Intro Splash Screen ──────────────────────── -->
     <div class="intro-screen" id="intro-screen">
-        <span class="intro-text">anmxlr</span>
+        <div class="intro-content">
+            <div class="intro-logo-container" id="intro-logo-container"></div>
+            <span class="intro-text">
+                <span class="letter">a</span>
+                <span class="letter">n</span>
+                <span class="letter">m</span>
+                <span class="letter">x</span>
+                <span class="letter">l</span>
+                <span class="letter">r</span>
+                <span class="letter">™</span>
+            </span>
+
+        </div>
     </div>
 
     <!-- ── Main Page ────────────────────────────────── -->
@@ -25,19 +39,185 @@
 
         <!-- Top Navigation Bar -->
         <nav class="top-bar" id="top-bar">
-            <div class="logo">anmxlr</div>
+            <div class="logo">
+                <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="logo-icon">
+                <span>anmxlr ™</span>
+            </div>
+            <div class="nav-tabs">
+                <a href="#" class="nav-tab">Home</a>
+                <a href="#about-section" class="nav-tab">About</a>
+                <a href="#projects-scroll-track" class="nav-tab">Projects</a>
+                <a href="#education-section" class="nav-tab">Education</a>
+                <a href="#experience-section" class="nav-tab">Experience</a>
+            </div>
             <a href="#" class="contact-btn" id="contact-btn">
                 <span>Contact</span>
                 <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </a>
+            <!-- Hamburger Button for Mobile -->
+            <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Toggle Navigation Menu">
+                <span class="line line-top"></span>
+                <span class="line line-middle"></span>
+                <span class="line line-bottom"></span>
+            </button>
         </nav>
+
+        <!-- Mobile Navigation Menu Overlay -->
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+            <div class="mobile-nav-content">
+                <div class="mobile-nav-links">
+                    <a href="#" class="mobile-nav-link" data-index="0">Home</a>
+                    <a href="#about-section" class="mobile-nav-link" data-index="1">About</a>
+                    <a href="#projects-scroll-track" class="mobile-nav-link" data-index="2">Projects</a>
+                    <a href="#education-section" class="mobile-nav-link" data-index="3">Education</a>
+                    <a href="#experience-section" class="mobile-nav-link" data-index="4">Experience</a>
+                    <a href="#" class="mobile-nav-link mobile-contact-link" id="mobile-contact-trigger" data-index="5">
+                        <span>Contact</span>
+                        <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <!-- Hero Section -->
         <section class="hero">
-            <h1 class="hero-title">anmxlr</h1>
+            <h1 class="hero-title">make something <span class="change-wrapper"><span class="word-strike">people
+                        want<span class="strike-half strike-top">people want</span><span
+                            class="strike-half strike-bottom">people want</span></span><span class="word-pop"><span
+                            class="typewriter-text"></span><span class="typewriter-cursor"></span></span></span></h1>
+            <p class="hero-easter">that people want</p>
             <p class="hero-subtitle">Building things on the internet.</p>
+        </section>
+
+        <!-- Projects Scroll Track (pins section while scrolling) -->
+        <div class="projects-scroll-track" id="projects-scroll-track">
+            <!-- Projects Showcase Section -->
+            <section class="projects-section" id="projects-section">
+
+                <!-- Cool Animated Black and White Background -->
+                <div class="projects-bg">
+                    <div class="projects-bg-grid"></div>
+                    <div class="projects-bg-circles">
+                        <div class="bg-circle bg-circle--1"></div>
+                        <div class="bg-circle bg-circle--2"></div>
+                        <div class="bg-circle bg-circle--3"></div>
+                    </div>
+                    <div class="projects-bg-overlay"></div>
+                </div>
+
+                <h2 class="projects-title">projects</h2>
+
+                <!-- 3D Stack Scene Wrapper -->
+                <div class="projects-stack-scene">
+                    <div class="projects-stack">
+                        <!-- Projects dynamically injected by main.js -->
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Education Section -->
+        <section class="education-section" id="education-section">
+            <h2 class="education-title">Education</h2>
+            <div class="education-timeline">
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-logo">
+                            <a href="https://www.iitb.ac.in/">
+                                <img src="src/assets/images/iitb.png" alt="IIT Bombay Logo" class="institution-logo">
+                            </a>
+                        </div>
+                        <div class="timeline-info">
+                            <div class="timeline-header">
+                                <h3 class="timeline-degree">Bachelor of Technology</h3>
+                                <span class="timeline-period">2024 — 2028</span>
+                            </div>
+                            <h4 class="timeline-institution">IIT Bombay</h4>
+
+                            <p class="timeline-desc">Minor in Artificial Intelligence and Data Science.</p>
+                            <p class="timeline-desc">Major in Mechanical Engineering</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section class="experience-section" id="experience-section">
+            <h2 class="experience-title">Work Experience</h2>
+            <div class="experience-timeline">
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-logo">
+                            <img src="src/assets/images/logo.svg" alt="Nexus Technologies logo" class="company-logo">
+                        </div>
+                        <div class="timeline-info">
+                            <div class="timeline-header">
+                                <h3 class="timeline-degree">Software Engineer Intern</h3>
+                                <span class="timeline-period">May 2025 — July 2025</span>
+                            </div>
+                            <h4 class="timeline-institution">Nexus Technologies</h4>
+                            <p class="timeline-desc">Designed and implemented responsive web platforms using modern web
+                                technologies. Optimized component rendering performance by 25% and integrated real-time
+                                data visualisations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-logo">
+                            <img src="src/assets/images/logo.svg" alt="Web and Coding Club logo" class="company-logo">
+                        </div>
+                        <div class="timeline-info">
+                            <div class="timeline-header">
+                                <h3 class="timeline-degree">Backend Developer</h3>
+                                <span class="timeline-period">Dec 2024 — Present</span>
+                            </div>
+                            <h4 class="timeline-institution">Web and Coding Club, IIT Bombay</h4>
+                            <p class="timeline-desc">Collaborated on building college-wide applications, setting up REST
+                                APIs, and maintaining codebase standards. Participated in organizing hackathons and
+                                technical bootcamps for student community.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Interactive Name Warp Section -->
+        <section class="name-warp-section" id="name-warp-section">
+            <div class="name-warp-container">
+                <canvas id="name-warp-canvas"></canvas>
+            </div>
+            <div class="connect-invite-container">
+                <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="connect-logo">
+                <h3 class="connect-title">Let's build something together</h3>
+                <p class="connect-subtitle">Interested in working together, have a query, or just want to say hello? I'd love to hear from you.</p>
+            </div>
+            <a href="#" class="connect-btn" id="name-connect-btn">
+                <span>Connect</span>
+                <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
+        </section>
+
+        <section class="hero" id="about-section">
+            <h1 class="hero-title">Some cool text here</h1>
+            <p class="hero-subtitle">Try selecting some text.</p>
         </section>
 
         <!-- Scroll Indicator -->
@@ -51,36 +231,14 @@
             <div class="footer-divider"></div>
             <div class="footer-content">
                 <div class="footer-left">
-                    <span class="footer-logo">anmxlr</span>
+                    <div class="footer-logo-container">
+                        <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="footer-logo-img">
+                        <span class="footer-logo">anmxlr ™</span>
+                    </div>
                     <p class="footer-copyright">© 2026 Anmol Raj. All rights reserved.</p>
                 </div>
                 <div class="footer-right">
-                    <span class="footer-heading">Contact</span>
-                    <div class="footer-links">
-                        <a href="mailto:anmxlr@gmail.com" class="footer-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="4" width="20" height="16" rx="2" />
-                                <path d="M22 4l-10 8L2 4" />
-                            </svg>
-                            Email
-                        </a>
-                        <a href="https://github.com/anmxlr" target="_blank" rel="noopener" class="footer-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
-                            </svg>
-                            GitHub
-                        </a>
-                        <a href="https://x.com/anmxlr" target="_blank" rel="noopener" class="footer-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4l11.733 16H20L8.267 4H4zm0 16l6.768-6.768M20 4l-6.768 6.768" />
-                            </svg>
-                            X / Twitter
-                        </a>
-                    </div>
+                    <span class="footer-heading">contact</span>
                 </div>
             </div>
         </footer>
@@ -98,7 +256,7 @@
             </div>
             <div class="contact-links">
 
-                <a href="mailto:anmxlr@gmail.com" class="contact-link">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=anmxlr@gmail.com" class="contact-link">
                     <div class="contact-link-icon">
                         <svg viewBox="0 0 24 24">
                             <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -131,8 +289,37 @@
                         </svg>
                     </div>
                     <div class="contact-link-info">
-                        <span class="contact-link-label">X / Twitter</span>
+                        <span class="contact-link-label">X</span>
                         <span class="contact-link-value">@anmxlr</span>
+                    </div>
+                </a>
+
+                <a href="https://instagram.com/anmxlr" target="_blank" rel="noopener" class="contact-link">
+                    <div class="contact-link-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                        </svg>
+                    </div>
+                    <div class="contact-link-info">
+                        <span class="contact-link-label">Instagram</span>
+                        <span class="contact-link-value">@anmxlr</span>
+                    </div>
+                </a>
+
+                <a href="https://www.linkedin.com/in/anmol-raj-026700313/" target="_blank" rel="noopener"
+                    class="contact-link">
+                    <div class="contact-link-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                            <rect x="2" y="9" width="4" height="12" />
+                            <circle cx="4" cy="4" r="2" />
+                        </svg>
+                    </div>
+                    <div class="contact-link-info">
+                        <span class="contact-link-label">LinkedIn</span>
+                        <span class="contact-link-value">Anmol Raj</span>
                     </div>
                 </a>
 
@@ -140,7 +327,12 @@
         </div>
     </div>
 
-    <script src="main.js"></script>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor-dot"></div>
+    <div class="custom-cursor-ring"></div>
+
+    <script src="src/components/project-card.js" defer></script>
+    <script src="src/main.js"></script>
 </body>
 
 </html>

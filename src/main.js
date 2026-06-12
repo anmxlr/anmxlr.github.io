@@ -1,0 +1,603 @@
+// Force scroll to top on refresh/load and disable automatic scroll restoration
+if (history.scrollRestoration) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const introScreen = document.getElementById('intro-screen');
+  const mainPage = document.getElementById('main-page');
+  const topBar = document.getElementById('top-bar');
+  const contactBtn = document.getElementById('contact-btn');
+  const modalOverlay = document.getElementById('modal-overlay');
+  const modalClose = document.getElementById('modal-close');
+  const scrollIndicator = document.getElementById('scroll-indicator');
+  const glowPrimary = document.querySelector('.glow-orb--primary');
+
+  // Custom Cursor elements
+  const cursorDot = document.querySelector('.custom-cursor-dot');
+  const cursorRing = document.querySelector('.custom-cursor-ring');
+  const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (isDesktop) {
+    document.documentElement.classList.add('has-custom-cursor');
+
+    // Custom cursor click & hover triggers (event delegation)
+    window.addEventListener('mouseover', (e) => {
+      const isInteractive = e.target.closest('a, button, project-card, .logo, [role="button"], #name-warp-canvas, .connect-btn');
+      document.documentElement.classList.toggle('cursor-hover', !!isInteractive);
+    });
+    window.addEventListener('mousedown', () => document.documentElement.classList.add('cursor-click'));
+    window.addEventListener('mouseup', () => document.documentElement.classList.remove('cursor-click'));
+  }
+
+  // ── Load and Animate Intro Logo SVG ───────────────
+  const introLogoContainer = document.getElementById('intro-logo-container');
+  if (introLogoContainer) {
+    fetch('src/assets/images/logo.svg')
+      .then(response => response.text())
+      .then(svgText => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = doc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('class', 'intro-logo-svg');
+          introLogoContainer.appendChild(svgElement);
+
+          const groups = Array.from(svgElement.querySelectorAll('g'));
+          const validGroups = groups.filter(g => {
+            const path = g.querySelector('path');
+            if (path) {
+              const d = path.getAttribute('d') || '';
+              return !d.includes('1600.00 1600.00'); // Filter out visual boundary box
+            }
+            return true;
+          });
+
+          const total = validGroups.length;
+          validGroups.forEach((g, index) => {
+            // Animate from smallest (end of groups array) to largest (start of array)
+            const reverseIndex = total - 1 - index;
+            // Delay starts at 0.15s, incrementing by 13ms per group chamber
+            const delay = 0.15 + (reverseIndex * 0.013);
+            g.style.animationDelay = `${delay}s`;
+          });
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load intro logo SVG:', err);
+        introLogoContainer.innerHTML = `<img src="src/assets/images/logo.svg" alt="anmxlr logo" class="intro-logo-fallback">`;
+      });
+  }
+
+  // ── Intro Animation Timers ───────────────────────
+  setTimeout(() => introScreen.classList.add('slide-up'), 2800);
+  setTimeout(() => {
+    mainPage.classList.add('visible');
+    topBar.classList.add('visible');
+    startHeroAnimation();
+  }, 3800);
+  setTimeout(() => {
+    introScreen.classList.add('hidden');
+    document.documentElement.classList.remove('scroll-locked');
+    document.body.classList.remove('scroll-locked');
+  }, 5000);
+
+  // ── Hero Title Word Animation ─────────────────────
+  function startHeroAnimation() {
+    const wrapper = document.querySelector('.change-wrapper');
+    const strike = document.querySelector('.word-strike');
+    const pop = document.querySelector('.word-pop');
+    if (!wrapper || !strike || !pop) return;
+
+    wrapper.style.width = `${strike.offsetWidth}px`;
+    setTimeout(() => wrapper.classList.add('cut'), 1200);
+    setTimeout(() => {
+      wrapper.classList.add('split');
+
+      const targetWord = "cool";
+
+      // Dynamic measurement of target word width
+      const tempSpan = document.createElement('span');
+      tempSpan.style.visibility = 'hidden';
+      tempSpan.style.position = 'absolute';
+      tempSpan.style.whiteSpace = 'nowrap';
+      tempSpan.style.font = window.getComputedStyle(pop).font;
+      tempSpan.textContent = targetWord;
+      document.body.appendChild(tempSpan);
+
+      // Let's add extra width for the cursor block (4px width + 4px margin)
+      const targetWidth = tempSpan.offsetWidth + 8;
+      document.body.removeChild(tempSpan);
+
+      wrapper.style.width = `${targetWidth}px`;
+    }, 1500);
+
+    setTimeout(() => {
+      wrapper.classList.add('pop');
+      typewriterEffect(pop.querySelector('.typewriter-text'), 'cool');
+    }, 1750);
+  }
+
+  function typewriterEffect(element, text) {
+    if (!element) return;
+    element.textContent = '';
+    let index = 0;
+
+    function type() {
+      if (index < text.length) {
+        element.textContent += text.charAt(index);
+        index++;
+        setTimeout(type, 180 + Math.random() * 120);
+      }
+    }
+
+    setTimeout(type, 150);
+  }
+
+  // ── Scroll Indicator Fade ──────────────────────────
+  window.addEventListener('scroll', () => {
+    scrollIndicator.classList.toggle('fade-out', window.scrollY > 80);
+  }, { passive: true });
+
+  // ── Projects Slide-Stack Dynamic Loading & Interaction ──────
+  const projectsTrack = document.getElementById('projects-scroll-track');
+  const projectsSec = document.getElementById('projects-section');
+  const projectsStack = document.querySelector('.projects-stack');
+  const bgCircles = document.querySelector('.projects-bg-circles');
+  const bgGrid = document.querySelector('.projects-bg-grid');
+
+  let targetProgress = 0, currentProgress = 0;
+  let targetMouseX = 0, targetMouseY = 0, currentMouseX = 0, currentMouseY = 0;
+  let gridOffset = 0;
+  let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+  let orbX = mouseX, orbY = mouseY;
+  let ringX = mouseX, ringY = mouseY;
+  let totalSlots = 0;
+  let slots = [];
+
+  // Shared mouse move listener for 3D parallax, mouse-glow orb, and custom cursor
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    // Position dot instantly
+    if (isDesktop && cursorDot) {
+      cursorDot.style.left = `${e.clientX}px`;
+      cursorDot.style.top = `${e.clientY}px`;
+    }
+
+    targetMouseX = (e.clientX / window.innerWidth) - 0.5;
+    targetMouseY = (e.clientY / window.innerHeight) - 0.5;
+  }, { passive: true });
+
+  // ── Name Warp Animation Setup ────────────────────
+  let nameWarpController = null;
+  const nameWarpSection = document.getElementById('name-warp-section');
+  if (nameWarpSection) {
+    nameWarpController = initNameWarp();
+  }
+
+  // ── Intersection Observer for Scroll Reveals ──────
+  const educationSection = document.getElementById('education-section');
+  const experienceSection = document.getElementById('experience-section');
+  const footerContent = document.querySelector('.footer-content');
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target === projectsTrack) {
+          projectsSec.classList.add('visible');
+        } else {
+          entry.target.classList.add('visible');
+          if (entry.target === nameWarpSection && nameWarpController) {
+            nameWarpController.start();
+          }
+        }
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  if (educationSection) revealObserver.observe(educationSection);
+  if (experienceSection) revealObserver.observe(experienceSection);
+  if (nameWarpSection) revealObserver.observe(nameWarpSection);
+  if (footerContent) revealObserver.observe(footerContent);
+
+  // Async function to load projects and initialize scroll behavior
+  async function loadProjects() {
+    if (!projectsTrack || !projectsStack) return;
+
+    let projects = [];
+    try {
+      const response = await fetch('src/data/projects.json');
+      if (!response.ok) throw new Error('Failed to fetch projects JSON');
+      projects = await response.json();
+    } catch (err) {
+      console.warn('Could not load projects.json, using default project list.', err);
+      projects = [
+        {
+          "id": "1",
+          "title": "Project Alpha",
+          "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
+          "tags": "HTML, CSS, Vanilla JS",
+          "link": "https://github.com/anmxlr",
+          "github": "https://github.com/anmxlr",
+          "image": ""
+        }
+      ];
+    }
+
+    totalSlots = projects.length;
+    if (totalSlots === 0) {
+      projectsTrack.style.display = 'none';
+      return;
+    }
+
+    // Dynamic track height calculation based on number of projects:
+    // If we have N projects:
+    // 1 project: 100vh (no pinned scroll progression needed)
+    // N projects: 100vh + (N - 1) * 100vh (locked scroll length is 100vh per transition)
+    const scrollHeightVh = totalSlots > 1 ? 100 + (totalSlots - 1) * 100 : 100;
+    projectsTrack.style.height = `${scrollHeightVh}vh`;
+
+    // Clear and inject slots
+    projectsStack.innerHTML = '';
+    projects.forEach((proj, idx) => {
+      const slot = document.createElement('div');
+      slot.className = 'stack-slot';
+      if (idx === 0) slot.classList.add('active');
+
+      const card = document.createElement('project-card');
+      card.setAttribute('title', proj.title);
+      card.setAttribute('description', proj.description);
+      card.setAttribute('tags', proj.tags);
+      card.setAttribute('link', proj.link);
+      if (proj.github) card.setAttribute('github', proj.github);
+      if (proj.image) card.setAttribute('image', proj.image);
+
+      slot.appendChild(card);
+      projectsStack.appendChild(slot);
+    });
+
+    slots = document.querySelectorAll('.stack-slot');
+
+    // Register scroll event listener for this track
+    window.addEventListener('scroll', () => {
+      const rect = projectsTrack.getBoundingClientRect();
+      const totalScrollable = rect.height - window.innerHeight;
+      if (totalScrollable > 0) {
+        targetProgress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+      } else {
+        targetProgress = 0;
+      }
+    }, { passive: true });
+
+    // Start render loop
+    renderLoop();
+
+    // Observe track for reveals
+    revealObserver.observe(projectsTrack);
+  }
+
+  // Animation Loop (lerps scroll progress, custom cursor ring, and parallax coordinates)
+  function renderLoop() {
+    currentProgress += (targetProgress - currentProgress) * 0.08;
+    currentMouseX += (targetMouseX - currentMouseX) * 0.05;
+    currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+
+    // Grid animation with velocity-driven speedup
+    const speed = 0.4 + Math.abs(targetProgress - currentProgress) * 25;
+    gridOffset = (gridOffset + speed) % 60;
+
+    const bounce = totalSlots > 1 ? Math.abs(Math.sin(currentProgress * Math.PI * (totalSlots - 1))) : 0;
+
+    if (bgCircles) {
+      bgCircles.style.transform = `rotate(${currentProgress * 80 + currentMouseX * 30}deg) translate3d(${currentMouseX * 35}px, ${currentMouseY * 35}px, 0) scale(${1 + bounce * 0.06})`;
+    }
+    if (bgGrid) {
+      bgGrid.style.transform = `perspective(600px) rotateX(${65 + currentMouseY * 12}deg) rotateY(${currentMouseX * 12}deg) translateY(${gridOffset}px)`;
+    }
+
+    const activeIndex = totalSlots > 1 ? Math.round(currentProgress * (totalSlots - 1)) : 0;
+
+    slots.forEach((slot, index) => {
+      const x = totalSlots > 1 ? index - currentProgress * (totalSlots - 1) : 0;
+      const absX = Math.abs(x);
+      slot.style.transform = `translate3d(${x * 125}%, ${absX * 20}px, 0) rotateY(${x * -18}deg) skewX(${x * -5}deg) scale(${1 - Math.min(absX * 0.08, 0.2)})`;
+      slot.style.opacity = Math.max(0, 1 - absX * 0.65);
+      slot.style.filter = absX > 0.1 ? `blur(${Math.min(absX * 2, 4)}px)` : 'none';
+      slot.classList.toggle('active', index === activeIndex);
+    });
+
+    // Animate mouse follow glow orb
+    if (glowPrimary) {
+      orbX += (mouseX - orbX) * 0.03;
+      orbY += (mouseY - orbY) * 0.03;
+      glowPrimary.style.left = `${orbX}px`;
+      glowPrimary.style.top = `${orbY}px`;
+      glowPrimary.style.transform = 'translate3d(-50%, -50%, 0)';
+    }
+
+    // Animate custom cursor ring
+    if (isDesktop && cursorRing) {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.left = `${ringX}px`;
+      cursorRing.style.top = `${ringY}px`;
+    }
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  // Load projects
+  loadProjects();
+
+  // ── Logo click to top ─────────────────────────────
+  const logo = document.querySelector('.logo');
+  if (logo) {
+    logo.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // ── Contact Modal Toggle ─────────────────────────
+  const toggleModal = (show) => modalOverlay.classList.toggle('active', show);
+  if (contactBtn && modalOverlay && modalClose) {
+    contactBtn.addEventListener('click', (e) => { e.preventDefault(); toggleModal(true); });
+    modalClose.addEventListener('click', () => toggleModal(false));
+    modalOverlay.addEventListener('click', (e) => e.target === modalOverlay && toggleModal(false));
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && toggleModal(false));
+
+    // Let's Connect button click handler
+    const nameConnectBtn = document.getElementById('name-connect-btn');
+    if (nameConnectBtn) {
+      nameConnectBtn.addEventListener('click', (e) => { e.preventDefault(); toggleModal(true); });
+    }
+  }
+
+  // ── Mobile Navigation Menu Toggle ──────────────────
+  const menuToggleBtn = document.getElementById('menu-toggle-btn');
+  const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+  const mobileContactTrigger = document.getElementById('mobile-contact-trigger');
+
+  const toggleMobileMenu = (show) => {
+    const isShowing = show !== undefined ? show : !mobileNavOverlay.classList.contains('active');
+    menuToggleBtn.classList.toggle('active', isShowing);
+    mobileNavOverlay.classList.toggle('active', isShowing);
+    document.documentElement.classList.toggle('scroll-locked', isShowing);
+    document.body.classList.toggle('scroll-locked', isShowing);
+  };
+
+  if (menuToggleBtn && mobileNavOverlay) {
+    menuToggleBtn.addEventListener('click', () => toggleMobileMenu());
+
+    // Close menu when clicking any nav link
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (link === mobileContactTrigger) {
+          e.preventDefault();
+          toggleMobileMenu(false);
+          // Small delay to let the menu close transition finish before showing the contact modal
+          setTimeout(() => toggleModal(true), 350);
+        } else {
+          toggleMobileMenu(false);
+        }
+      });
+    });
+
+    // Close menu when clicking outside of links (on the overlay itself)
+    mobileNavOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileNavOverlay) {
+        toggleMobileMenu(false);
+      }
+    });
+  }
+
+  function initNameWarp() {
+    const canvas = document.getElementById('name-warp-canvas');
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+
+    let particles = [];
+    let mouse = { x: null, y: null, radius: 100 };
+    let time = 0;
+    let animId = null;
+    let active = false;
+
+    class WarpParticle {
+      constructor(canvasWidth, canvasHeight, x, y, size) {
+        this.x = Math.random() * canvasWidth;
+        this.y = Math.random() * canvasHeight;
+        this.originX = x;
+        this.originY = y;
+        this.baseSize = size;
+        this.size = size;
+        this.vx = 0;
+        this.vy = 0;
+        this.ease = 0.04 + Math.random() * 0.04;
+        this.friction = 0.85 + Math.random() * 0.05;
+      }
+
+      update(mouseX, mouseY, mouseRadius, time) {
+        const targetX = this.originX;
+        const targetY = this.originY;
+
+        let targetSize = this.baseSize;
+        let pushX = 0;
+        let pushY = 0;
+
+        if (mouseX !== null && mouseY !== null) {
+          const dx = this.x - mouseX;
+          const dy = this.y - mouseY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < mouseRadius) {
+            const force = (mouseRadius - distance) / mouseRadius;
+            const angle = Math.atan2(dy, dx);
+            const pushDistance = 45 * force;
+            pushX = Math.cos(angle) * pushDistance;
+            pushY = Math.sin(angle) * pushDistance;
+            targetSize = this.baseSize * (1 + force * 2.5);
+          }
+        }
+
+        this.size += (targetSize - this.size) * 0.15;
+
+        const destX = targetX + pushX;
+        const destY = targetY + pushY;
+
+        const ax = (destX - this.x) * this.ease;
+        const ay = (destY - this.y) * this.ease;
+
+        this.vx += ax;
+        this.vy += ay;
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+
+        this.x += this.vx;
+        this.y += this.vy;
+      }
+
+      draw(ctx) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+      }
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      mouse.radius = Math.min(rect.width * 0.15, 110);
+      createTextParticles(rect.width, rect.height);
+    }
+
+    function createTextParticles(wFloat, hFloat) {
+      const w = Math.floor(wFloat);
+      const h = Math.floor(hFloat);
+      particles = [];
+      if (w <= 0 || h <= 0) return;
+
+      const offscreen = document.createElement('canvas');
+      offscreen.width = w;
+      offscreen.height = h;
+      const octx = offscreen.getContext('2d');
+
+      let fontSize = Math.min(w * 0.08, 100);
+      octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+      octx.fillStyle = '#ffffff';
+      octx.textAlign = 'center';
+      octx.textBaseline = 'middle';
+
+      const textString = 'Building AI, Products, and Other Cool Stuff.';
+      let textWidth = octx.measureText(textString).width;
+      const maxAllowedWidth = w * 0.92;
+
+      if (textWidth > maxAllowedWidth) {
+        fontSize = fontSize * (maxAllowedWidth / textWidth);
+        octx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+      }
+
+      octx.fillText(textString, w / 2, h / 2);
+
+      const imgData = octx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      const step = w > 768 ? 4 : 3;
+
+      for (let y = 0; y < h; y += step) {
+        for (let x = 0; x < w; x += step) {
+          const index = (y * w + x) * 4;
+          const alpha = data[index + 3];
+          if (alpha > 128) {
+            const size = Math.random() * 1.5 + 1.5;
+            particles.push(new WarpParticle(w, h, x, y, size));
+          }
+        }
+      }
+    }
+
+    function animate() {
+      if (!active) return;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      time++;
+
+      particles.forEach(p => {
+        p.update(mouse.x, mouse.y, mouse.radius, time);
+        p.draw(ctx);
+      });
+
+      animId = requestAnimationFrame(animate);
+    }
+
+    function onMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    }
+
+    function onMouseLeave() {
+      mouse.x = null;
+      mouse.y = null;
+    }
+
+    function onTouchMove(e) {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.touches[0].clientX - rect.left;
+        mouse.y = e.touches[0].clientY - rect.top;
+      }
+    }
+
+    // Trigger redraw when fonts finish loading to ensure correct typeface shapes
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        if (active) resize();
+      });
+    }
+
+    function onTouchEnd() {
+      mouse.x = null;
+      mouse.y = null;
+    }
+
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseleave', onMouseLeave);
+    canvas.addEventListener('touchmove', onTouchMove, { passive: true });
+    canvas.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    const handleResize = debounce(() => {
+      resize();
+    }, 150);
+
+    window.addEventListener('resize', handleResize);
+
+    return {
+      start() {
+        if (active) return;
+        active = true;
+        resize();
+        animate();
+      },
+      stop() {
+        active = false;
+        if (animId) cancelAnimationFrame(animId);
+      }
+    };
+  }
+
+  function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+});

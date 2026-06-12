@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "title": "Project Alpha",
+    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
+    "tags": "HTML, CSS, Vanilla JS",
+    "link": "https://github.com/anmxlr",
+    "github": "https://github.com/anmxlr",
+    "image": "src/assets/images/iitb.png"
+  },
+  {
+    "id": "2",
+    "title": "Project Beta",
+    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
+    "tags": "HTML, CSS, Vanilla JS",
+    "link": "https://github.com/anmxlr",
+    "github": "https://github.com/anmxlr",
+    "image": "src/assets/images/iitb.png"
+  }
+]s
