@@ -2,28 +2,34 @@
   {
     "id": "1",
     "title": "Your Name on India-SAT",
-    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
-    "tags": "HTML, CSS, Vanilla JS",
+    "description": "A sharp public-facing web experience built around a space-themed participation idea, tuned for clean storytelling and fast static delivery.",
+    "tags": "HTML, CSS, Vanilla JS, UI",
     "link": "https://github.com/anmxlr",
     "github": "https://github.com/anmxlr",
-    "image": "src/assets/images/projects/1.png"
+    "image": "src/assets/images/projects/1.png",
+    "year": "2026",
+    "status": "Featured"
   },
   {
     "id": "2",
-    "title": "Project Beta",
-    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
-    "tags": "HTML, CSS, Vanilla JS",
+    "title": "Campus Systems Experiments",
+    "description": "Backend and product experiments for college-scale workflows: cleaner APIs, faster loops, and tools that hold up under real student usage.",
+    "tags": "Backend, REST, Product",
     "link": "https://github.com/anmxlr",
     "github": "https://github.com/anmxlr",
-    "image": "src/assets/images/iitb.png"
+    "image": "src/assets/images/iitb.png",
+    "year": "2025",
+    "status": "Building"
   },
   {
     "id": "3",
-    "title": "Project Gamma",
-    "description": "An elegant open-source web application designed with absolute-black themes and high performance.",
-    "tags": "HTML, CSS, Vanilla JS",
+    "title": "Interface Lab",
+    "description": "A playground for motion, black-and-white visual systems, canvas interactions, custom cursors, and hidden details that reward attention.",
+    "tags": "Canvas, Motion, CSS, JS",
     "link": "https://github.com/anmxlr",
     "github": "https://github.com/anmxlr",
-    "image": "src/assets/images/iitb.png"
+    "image": "src/assets/images/iitb.png",
+    "year": "2026",
+    "status": "Ongoing"
   }
 ]

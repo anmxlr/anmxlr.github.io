@@ -10,6 +10,8 @@ class ProjectCard extends HTMLElement {
     const link = this.getAttribute('link') || '#';
     const github = this.getAttribute('github') || '';
     const image = this.getAttribute('image') || '';
+    const year = this.getAttribute('year') || '2026';
+    const status = this.getAttribute('status') || 'Live';
 
     // Create container inside the custom element
     const container = document.createElement('div');
@@ -24,10 +26,18 @@ class ProjectCard extends HTMLElement {
     const imageHTML = image
       ? `<div class="project-card-image-wrapper">
            <img class="project-card-image" src="${image}" alt="${title}">
+           <div class="project-card-meta">
+             <span>${year}</span>
+             <span>${status}</span>
+           </div>
          </div>`
       : `<div class="project-card-image-wrapper placeholder-wrapper">
            <div class="project-card-placeholder-glow"></div>
            <span class="project-card-placeholder-text">${title.charAt(0).toUpperCase()}</span>
+           <div class="project-card-meta">
+             <span>${year}</span>
+             <span>${status}</span>
+           </div>
          </div>`;
 
     // Build action links HTML

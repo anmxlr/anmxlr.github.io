@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Custom cursor click & hover triggers (event delegation)
     window.addEventListener('mouseover', (e) => {
-      const isInteractive = e.target.closest('a, button, project-card, .logo, [role="button"], #name-warp-canvas, .connect-btn');
+      const isInteractive = e.target.closest('a, button, input, project-card, .logo, [role="button"], #name-warp-canvas, .connect-btn, .signal-panel');
       document.documentElement.classList.toggle('cursor-hover', !!isInteractive);
     });
     window.addEventListener('mousedown', () => document.documentElement.classList.add('cursor-click'));
@@ -156,6 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalSlots = 0;
   let slots = [];
 
+  initConstellation();
+  initLabConsole();
+  initHiddenTerminal();
+  initSignalPanel();
+  initEasterEggs();
+  initPhonePuzzle();
+
   // Shared mouse move listener for 3D parallax, mouse-glow orb, and custom cursor
   window.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
@@ -181,6 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Intersection Observer for Scroll Reveals ──────
   const educationSection = document.getElementById('education-section');
   const experienceSection = document.getElementById('experience-section');
+  const aboutSection = document.getElementById('about-section');
+  const labSection = document.getElementById('lab-section');
   const footerContent = document.querySelector('.footer-content');
 
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -201,6 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (educationSection) revealObserver.observe(educationSection);
   if (experienceSection) revealObserver.observe(experienceSection);
+  if (aboutSection) revealObserver.observe(aboutSection);
+  if (labSection) revealObserver.observe(labSection);
   if (nameWarpSection) revealObserver.observe(nameWarpSection);
   if (footerContent) revealObserver.observe(footerContent);
 
@@ -255,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
       card.setAttribute('link', proj.link);
       if (proj.github) card.setAttribute('github', proj.github);
       if (proj.image) card.setAttribute('image', proj.image);
+      if (proj.year) card.setAttribute('year', proj.year);
+      if (proj.status) card.setAttribute('status', proj.status);
 
       slot.appendChild(card);
       projectsStack.appendChild(slot);
@@ -392,6 +405,289 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === mobileNavOverlay) {
         toggleMobileMenu(false);
       }
+    });
+  }
+
+  function initConstellation() {
+    const canvas = document.getElementById('constellation-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const points = [];
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let rafId = null;
+
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      points.length = 0;
+      const count = Math.min(70, Math.max(28, Math.floor(width * height / 24000)));
+      for (let i = 0; i < count; i++) {
+        points.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.18,
+          vy: (Math.random() - 0.5) * 0.18,
+          r: Math.random() * 1.2 + 0.4
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      points.forEach((point, index) => {
+        point.x += point.vx + targetMouseX * 0.04;
+        point.y += point.vy + targetMouseY * 0.04;
+        if (point.x < 0 || point.x > width) point.vx *= -1;
+        if (point.y < 0 || point.y > height) point.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, point.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = index + 1; j < points.length; j++) {
+          const other = points[j];
+          const dx = point.x - other.x;
+          const dy = point.y - other.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 115) {
+            ctx.globalAlpha = (1 - distance / 115) * 0.55;
+            ctx.beginPath();
+            ctx.moveTo(point.x, point.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+        }
+      });
+      rafId = requestAnimationFrame(draw);
+    }
+
+    const onResize = debounce(resize, 150);
+    window.addEventListener('resize', onResize);
+    resize();
+    draw();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && rafId) {
+        cancelAnimationFrame(rafId);
+      } else if (!document.hidden) {
+        draw();
+      }
+    });
+  }
+
+  function initLabConsole() {
+    const chips = document.querySelectorAll('.lab-chip');
+    const text = document.getElementById('lab-console-text');
+    if (!chips.length || !text) return;
+
+    const copy = {
+      ai: 'Training models to become useful products, not just impressive demos.',
+      web: 'Obsessing over motion, latency, layout, and the tiny details that make an interface feel inevitable.',
+      backend: 'Designing APIs, data flows, and services that stay calm when the frontend gets ambitious.',
+      product: 'Turning vague ideas into shippable loops: build, test, learn, tighten.'
+    };
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(item => item.classList.remove('active'));
+        chip.classList.add('active');
+        text.animate(
+          [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
+          { duration: 260, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+        );
+        text.textContent = copy[chip.dataset.lab] || copy.ai;
+      });
+    });
+  }
+
+  function initSignalPanel() {
+    const panel = document.getElementById('signal-panel');
+    if (!panel) return;
+
+    panel.addEventListener('mousemove', (e) => {
+      const rect = panel.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      panel.style.transform = `perspective(700px) rotateX(${y * -7}deg) rotateY(${x * 9}deg)`;
+    });
+
+    panel.addEventListener('mouseleave', () => {
+      panel.style.transform = '';
+    });
+
+    const counters = panel.querySelectorAll('[data-count-to]');
+    const counterObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        counters.forEach(counter => {
+          const target = Number(counter.dataset.countTo || 0);
+          const start = performance.now();
+          const duration = 1100;
+          function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            counter.textContent = Math.round(target * eased).toString();
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        });
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.35 });
+    counterObserver.observe(panel);
+  }
+
+  function initHiddenTerminal() {
+    const overlay = document.getElementById('terminal-overlay');
+    const body = document.getElementById('terminal-body');
+    const form = document.getElementById('terminal-form');
+    const input = document.getElementById('terminal-input');
+    const close = document.getElementById('terminal-close');
+    const trigger = document.getElementById('command-trigger');
+    if (!overlay || !body || !form || !input || !close) return;
+
+    const openTerminal = () => {
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+      setTimeout(() => input.focus(), 80);
+    };
+    const closeTerminal = () => {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    };
+    const writeLine = (text, muted = false) => {
+      const p = document.createElement('p');
+      if (muted) p.className = 'terminal-muted';
+      p.textContent = text;
+      body.appendChild(p);
+      body.scrollTop = body.scrollHeight;
+    };
+
+    if (trigger) trigger.addEventListener('click', openTerminal);
+    close.addEventListener('click', closeTerminal);
+    overlay.addEventListener('click', (e) => e.target === overlay && closeTerminal());
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const command = input.value.trim().toLowerCase();
+      if (!command) return;
+      writeLine(`$ ${command}`, true);
+      input.value = '';
+
+      if (command === 'projects') {
+        closeTerminal();
+        document.getElementById('projects-scroll-track')?.scrollIntoView({ behavior: 'smooth' });
+      } else if (command === 'contact') {
+        closeTerminal();
+        toggleModal(true);
+      } else if (command === 'manifesto') {
+        writeLine('make it fast. make it useful. hide a little magic inside.');
+      } else if (command === 'clear') {
+        body.innerHTML = '';
+      } else if (command === 'close' || command === 'exit') {
+        closeTerminal();
+      } else if (command === 'home') {
+        closeTerminal();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        writeLine('unknown command. try: projects, contact, manifesto, clear, close, home');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const typing = e.target.matches('input, textarea');
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openTerminal();
+      } else if (e.key === 'Escape' && overlay.classList.contains('active')) {
+        closeTerminal();
+      } else if (!typing && e.key === '`') {
+        e.preventDefault();
+        openTerminal();
+      }
+    });
+  }
+
+  function initEasterEggs() {
+    const toast = document.getElementById('egg-toast');
+    const logo = document.querySelector('.logo');
+    let logoClicks = 0;
+    let toastTimer = null;
+    let keyBuffer = '';
+
+    const showToast = (message) => {
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    };
+
+    if (logo) {
+      logo.addEventListener('click', () => {
+        logoClicks++;
+        if (logoClicks === 3) showToast('logo frequency unlocked: triple tap detected.');
+        if (logoClicks >= 5) {
+          document.documentElement.classList.add('logo-tilt');
+          showToast('easter egg: spin protocol armed.');
+          setTimeout(() => document.documentElement.classList.remove('logo-tilt'), 950);
+          logoClicks = 0;
+        }
+        setTimeout(() => { logoClicks = 0; }, 1400);
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.matches('input, textarea')) return;
+      keyBuffer = (keyBuffer + e.key.toLowerCase()).slice(-12);
+      if (keyBuffer.endsWith('anmxlr')) {
+        showToast('secret handshake accepted.');
+        document.documentElement.classList.add('logo-tilt');
+        setTimeout(() => document.documentElement.classList.remove('logo-tilt'), 950);
+      }
+    });
+  }
+
+  function initPhonePuzzle() {
+    const trigger = document.getElementById('footer-contact-lock');
+    const puzzle = document.getElementById('phone-puzzle');
+    const input = document.getElementById('phone-puzzle-input');
+    const submit = document.getElementById('phone-puzzle-submit');
+    const result = document.getElementById('phone-puzzle-result');
+    if (!trigger || !puzzle || !input || !submit || !result) return;
+
+    const contactNumber = '+91 XXXXX XXXXX';
+    const unlock = () => {
+      const answer = input.value.trim();
+      if (answer === '12') {
+        result.textContent = contactNumber;
+        result.classList.add('unlocked');
+        trigger.textContent = 'Number unlocked';
+      } else {
+        result.textContent = 'Not quite. Tiny arithmetic boss fight.';
+        result.classList.remove('unlocked');
+      }
+    };
+
+    trigger.addEventListener('click', () => {
+      const isOpen = puzzle.classList.toggle('active');
+      puzzle.setAttribute('aria-hidden', String(!isOpen));
+      if (isOpen) setTimeout(() => input.focus(), 80);
+    });
+
+    submit.addEventListener('click', unlock);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') unlock();
     });
   }
 

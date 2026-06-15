@@ -36,6 +36,7 @@
         <!-- Ambient glow orbs -->
         <div class="glow-orb glow-orb--primary"></div>
         <div class="glow-orb glow-orb--secondary"></div>
+        <canvas class="constellation-canvas" id="constellation-canvas" aria-hidden="true"></canvas>
 
         <!-- Top Navigation Bar -->
         <nav class="top-bar" id="top-bar">
@@ -46,6 +47,7 @@
             <div class="nav-tabs">
                 <a href="#" class="nav-tab">Home</a>
                 <a href="#about-section" class="nav-tab">About</a>
+                <a href="#lab-section" class="nav-tab">Lab</a>
                 <a href="#projects-scroll-track" class="nav-tab">Projects</a>
                 <a href="#education-section" class="nav-tab">Education</a>
                 <a href="#experience-section" class="nav-tab">Experience</a>
@@ -70,10 +72,11 @@
                 <div class="mobile-nav-links">
                     <a href="#" class="mobile-nav-link" data-index="0">Home</a>
                     <a href="#about-section" class="mobile-nav-link" data-index="1">About</a>
-                    <a href="#projects-scroll-track" class="mobile-nav-link" data-index="2">Projects</a>
-                    <a href="#education-section" class="mobile-nav-link" data-index="3">Education</a>
-                    <a href="#experience-section" class="mobile-nav-link" data-index="4">Experience</a>
-                    <a href="#" class="mobile-nav-link mobile-contact-link" id="mobile-contact-trigger" data-index="5">
+                    <a href="#lab-section" class="mobile-nav-link" data-index="2">Lab</a>
+                    <a href="#projects-scroll-track" class="mobile-nav-link" data-index="3">Projects</a>
+                    <a href="#education-section" class="mobile-nav-link" data-index="4">Education</a>
+                    <a href="#experience-section" class="mobile-nav-link" data-index="5">Experience</a>
+                    <a href="#" class="mobile-nav-link mobile-contact-link" id="mobile-contact-trigger" data-index="6">
                         <span>Contact</span>
                         <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round"
@@ -94,6 +97,62 @@
             <p class="hero-subtitle">Building things on the internet.</p>
         </section>
 
+        <!-- About Section -->
+        <section class="about-section" id="about-section">
+            <div class="section-kicker">Profile</div>
+            <div class="about-grid">
+                <div class="about-copy">
+                    <h2 class="about-title">I build sharp, fast, slightly unusual things for the web.</h2>
+                    <p class="about-text">I am Anmol Raj, an IIT Bombay student exploring the space between AI, product engineering, and interfaces that feel alive. I like systems that are practical first, memorable second, and secretly playful when someone pays attention.</p>
+                    <div class="about-actions">
+                        <a href="#projects-scroll-track" class="magnetic-link">View work</a>
+                        <button class="magnetic-link command-trigger" type="button" id="command-trigger">Open console</button>
+                    </div>
+                </div>
+                <div class="signal-panel" id="signal-panel">
+                    <div class="signal-panel-header">
+                        <span>anmxlr.sys</span>
+                        <span class="signal-live">live</span>
+                    </div>
+                    <div class="signal-readout">
+                        <div>
+                            <span class="readout-value" data-count-to="25">0</span>
+                            <span class="readout-label">render boost</span>
+                        </div>
+                        <div>
+                            <span class="readout-value" data-count-to="2028">0</span>
+                            <span class="readout-label">iitb batch</span>
+                        </div>
+                        <div>
+                            <span class="readout-value" data-count-to="100">0</span>
+                            <span class="readout-label">curiosity</span>
+                        </div>
+                    </div>
+                    <div class="signal-lines" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lab Section -->
+        <section class="lab-section" id="lab-section">
+            <div class="section-kicker">Lab</div>
+            <h2 class="lab-title">Things I keep getting better at.</h2>
+            <div class="lab-orbit" id="lab-orbit">
+                <button class="lab-chip active" type="button" data-lab="ai">AI systems</button>
+                <button class="lab-chip" type="button" data-lab="web">Web craft</button>
+                <button class="lab-chip" type="button" data-lab="backend">Backend</button>
+                <button class="lab-chip" type="button" data-lab="product">Product sense</button>
+            </div>
+            <div class="lab-console" id="lab-console" aria-live="polite">
+                <div class="lab-console-top">
+                    <span></span><span></span><span></span>
+                </div>
+                <p class="lab-console-text" id="lab-console-text">Training models to become useful products, not just impressive demos.</p>
+            </div>
+        </section>
+
         <!-- Projects Scroll Track (pins section while scrolling) -->
         <div class="projects-scroll-track" id="projects-scroll-track">
             <!-- Projects Showcase Section -->
@@ -110,7 +169,16 @@
                     <div class="projects-bg-overlay"></div>
                 </div>
 
-                <h2 class="projects-title">projects</h2>
+                <div class="projects-heading">
+                    <span class="section-kicker">Selected Work</span>
+                    <h2 class="projects-title">projects</h2>
+                    <p class="projects-subtitle">A scroll-controlled stack of things I am building, testing, and sharpening.</p>
+                </div>
+                <div class="projects-progress" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
 
                 <!-- 3D Stack Scene Wrapper -->
                 <div class="projects-stack-scene">
@@ -124,7 +192,9 @@
 
         <!-- Education Section -->
         <section class="education-section" id="education-section">
+            <div class="section-kicker">Academic Base</div>
             <h2 class="education-title">Education</h2>
+            <p class="section-lede">A mechanical engineering foundation with a strong pull toward AI, data systems, and product-minded software.</p>
             <div class="education-timeline">
 
                 <div class="timeline-item">
@@ -144,6 +214,11 @@
 
                             <p class="timeline-desc">Minor in Artificial Intelligence and Data Science.</p>
                             <p class="timeline-desc">Major in Mechanical Engineering</p>
+                            <div class="timeline-tags">
+                                <span>AI + DS</span>
+                                <span>Mechanical Systems</span>
+                                <span>Product Engineering</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -153,7 +228,9 @@
 
         <!-- Experience Section -->
         <section class="experience-section" id="experience-section">
+            <div class="section-kicker">Field Notes</div>
             <h2 class="experience-title">Work Experience</h2>
+            <p class="section-lede">Hands-on work across interfaces, backend systems, performance, and student tech communities.</p>
             <div class="experience-timeline">
 
                 <div class="timeline-item">
@@ -171,6 +248,11 @@
                             <p class="timeline-desc">Designed and implemented responsive web platforms using modern web
                                 technologies. Optimized component rendering performance by 25% and integrated real-time
                                 data visualisations.</p>
+                            <div class="timeline-tags">
+                                <span>Performance</span>
+                                <span>Responsive UI</span>
+                                <span>Data Viz</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -190,6 +272,11 @@
                             <p class="timeline-desc">Collaborated on building college-wide applications, setting up REST
                                 APIs, and maintaining codebase standards. Participated in organizing hackathons and
                                 technical bootcamps for student community.</p>
+                            <div class="timeline-tags">
+                                <span>REST APIs</span>
+                                <span>Developer Community</span>
+                                <span>Hackathons</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,11 +302,6 @@
             </a>
         </section>
 
-        <section class="hero" id="about-section">
-            <h1 class="hero-title">Some cool text here</h1>
-            <p class="hero-subtitle">Try selecting some text.</p>
-        </section>
-
         <!-- Scroll Indicator -->
         <div class="scroll-indicator" id="scroll-indicator">
             <div class="scroll-line"></div>
@@ -239,6 +321,15 @@
                 </div>
                 <div class="footer-right">
                     <span class="footer-heading">contact</span>
+                    <button class="footer-contact-lock" type="button" id="footer-contact-lock">Contact me</button>
+                    <div class="phone-puzzle" id="phone-puzzle" aria-hidden="true">
+                        <label for="phone-puzzle-input">Unlock number: 7 + 5 =</label>
+                        <div class="phone-puzzle-row">
+                            <input id="phone-puzzle-input" inputmode="numeric" autocomplete="off">
+                            <button type="button" id="phone-puzzle-submit">Unlock</button>
+                        </div>
+                        <p class="phone-puzzle-result" id="phone-puzzle-result">Locked behind human energy.</p>
+                    </div>
                 </div>
             </div>
         </footer>
@@ -328,6 +419,24 @@
     </div>
 
     <!-- Custom Cursor -->
+    <div class="egg-toast" id="egg-toast" role="status" aria-live="polite"></div>
+    <div class="terminal-overlay" id="terminal-overlay" aria-hidden="true">
+        <div class="terminal-window">
+            <div class="terminal-top">
+                <span>anmxlr://hidden-console</span>
+                <button type="button" id="terminal-close" aria-label="Close hidden console">Close</button>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+                <p><span class="terminal-muted">$</span> boot --portfolio</p>
+                <p>signal found. keep building.</p>
+                <p class="terminal-muted">try: projects, contact, manifesto, clear, close</p>
+            </div>
+            <form class="terminal-form" id="terminal-form">
+                <span>$</span>
+                <input id="terminal-input" autocomplete="off" spellcheck="false" aria-label="Hidden console command">
+            </form>
+        </div>
+    </div>
     <div class="custom-cursor-dot"></div>
     <div class="custom-cursor-ring"></div>
 
