@@ -194,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const experienceSection = document.getElementById('experience-section');
   const aboutSection = document.getElementById('about-section');
   const labSection = document.getElementById('lab-section');
+  const lifeSection = document.getElementById('life-section');
   const footerContent = document.querySelector('.footer-content');
 
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (experienceSection) revealObserver.observe(experienceSection);
   if (aboutSection) revealObserver.observe(aboutSection);
   if (labSection) revealObserver.observe(labSection);
+  if (lifeSection) revealObserver.observe(lifeSection);
   if (nameWarpSection) revealObserver.observe(nameWarpSection);
   if (footerContent) revealObserver.observe(footerContent);
 
