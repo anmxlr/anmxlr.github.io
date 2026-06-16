@@ -116,7 +116,7 @@
                     </div>
                     <div class="signal-readout">
                         <div>
-                            <span class="readout-value" data-count-to="25">0</span>
+                            <span class="readout-value" data-count-to="21">0</span>
                             <span class="readout-label">render boost</span>
                         </div>
                         <div>
@@ -171,20 +171,21 @@
 
                 <div class="projects-heading">
                     <span class="section-kicker">Selected Work</span>
-                    <h2 class="projects-title">projects</h2>
+                    <h2 class="projects-title">Projects</h2>
                     <p class="projects-subtitle">A scroll-controlled stack of things I am building, testing, and sharpening.</p>
-                </div>
-                <div class="projects-progress" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                    <span></span>
                 </div>
 
                 <!-- 3D Stack Scene Wrapper -->
-                <div class="projects-stack-scene">
-                    <div class="projects-stack">
-                        <!-- Projects dynamically injected by main.js -->
+                <div class="projects-stack-scroller" id="projects-stack-scroller" tabindex="0" aria-label="Scrollable projects stack">
+                    <div class="projects-stack-stage">
+                        <div class="projects-stack-scene">
+                            <div class="projects-stack">
+                                <!-- Projects dynamically injected by main.js -->
+                            </div>
+                        </div>
                     </div>
+                    <div class="projects-stack-spacer" id="projects-stack-spacer" aria-hidden="true"></div>
+                    <div class="projects-stack-progress" aria-hidden="true"><span></span></div>
                 </div>
 
             </section>
@@ -302,6 +303,35 @@
             </a>
         </section>
 
+        <!-- Reach Out Section -->
+        <section class="reach-section" id="reach-section">
+            <div class="section-kicker">Reach Out</div>
+            <h2 class="reach-title">Send me a clean brief.</h2>
+            <form class="reach-form" id="reach-form">
+                <div class="reach-field">
+                    <label for="reach-name">Name</label>
+                    <input id="reach-name" name="name" autocomplete="name" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-location">Location</label>
+                    <input id="reach-location" name="location" autocomplete="address-level2">
+                </div>
+                <div class="reach-field">
+                    <label for="reach-building">What you are building</label>
+                    <input id="reach-building" name="building" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-email">Email ID</label>
+                    <input id="reach-email" name="email" type="email" autocomplete="email" required>
+                </div>
+                <div class="reach-field reach-field-full">
+                    <label for="reach-message">Message for me</label>
+                    <textarea id="reach-message" name="message" rows="5" required></textarea>
+                </div>
+                <button class="reach-send" type="submit">Send message</button>
+            </form>
+        </section>
+
         <!-- Scroll Indicator -->
         <div class="scroll-indicator" id="scroll-indicator">
             <div class="scroll-line"></div>
@@ -321,14 +351,14 @@
                 </div>
                 <div class="footer-right">
                     <span class="footer-heading">contact</span>
-                    <button class="footer-contact-lock" type="button" id="footer-contact-lock">Contact me</button>
+                    <button class="footer-contact-lock" type="button" id="footer-contact-lock">Unlock mobile number</button>
                     <div class="phone-puzzle" id="phone-puzzle" aria-hidden="true">
-                        <label for="phone-puzzle-input">Unlock number: 7 + 5 =</label>
+                        <label for="phone-puzzle-input">Unlock: What is the probability of rolling a sum of 7 when rolling two fair 6-sided dice? (upto to decimal places.)</label>
                         <div class="phone-puzzle-row">
                             <input id="phone-puzzle-input" inputmode="numeric" autocomplete="off">
                             <button type="button" id="phone-puzzle-submit">Unlock</button>
                         </div>
-                        <p class="phone-puzzle-result" id="phone-puzzle-result">Locked behind human energy.</p>
+                        <p class="phone-puzzle-result" id="phone-puzzle-result">use your brain.</p>
                     </div>
                 </div>
             </div>
@@ -424,7 +454,7 @@
         <div class="terminal-window">
             <div class="terminal-top">
                 <span>anmxlr://hidden-console</span>
-                <button type="button" id="terminal-close" aria-label="Close hidden console">Close</button>
+
             </div>
             <div class="terminal-body" id="terminal-body">
                 <p><span class="terminal-muted">$</span> boot --portfolio</p>

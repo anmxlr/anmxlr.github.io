@@ -143,6 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Projects Slide-Stack Dynamic Loading & Interaction ──────
   const projectsTrack = document.getElementById('projects-scroll-track');
   const projectsSec = document.getElementById('projects-section');
+  const projectsScroller = document.getElementById('projects-stack-scroller');
+  const projectsSpacer = document.getElementById('projects-stack-spacer');
+  const projectsProgress = document.querySelector('.projects-stack-progress span');
   const projectsStack = document.querySelector('.projects-stack');
   const bgCircles = document.querySelector('.projects-bg-circles');
   const bgGrid = document.querySelector('.projects-bg-grid');
@@ -162,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSignalPanel();
   initEasterEggs();
   initPhonePuzzle();
+  initReachForm();
 
   // Shared mouse move listener for 3D parallax, mouse-glow orb, and custom cursor
   window.addEventListener('mousemove', (e) => {
@@ -217,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Async function to load projects and initialize scroll behavior
   async function loadProjects() {
-    if (!projectsTrack || !projectsStack) return;
+    if (!projectsTrack || !projectsStack || !projectsScroller || !projectsSpacer) return;
 
     let projects = [];
     try {
@@ -245,12 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Dynamic track height calculation based on number of projects:
-    // If we have N projects:
-    // 1 project: 100vh (no pinned scroll progression needed)
-    // N projects: 100vh + (N - 1) * 100vh (locked scroll length is 100vh per transition)
-    const scrollHeightVh = totalSlots > 1 ? 100 + (totalSlots - 1) * 100 : 100;
-    projectsTrack.style.height = `${scrollHeightVh}vh`;
+    projectsSpacer.style.height = totalSlots > 1 ? `${Math.max(900, totalSlots * 360)}px` : '100%';
 
     // Clear and inject slots
     projectsStack.innerHTML = '';
@@ -275,15 +274,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     slots = document.querySelectorAll('.stack-slot');
 
-    // Register scroll event listener for this track
-    window.addEventListener('scroll', () => {
-      const rect = projectsTrack.getBoundingClientRect();
-      const totalScrollable = rect.height - window.innerHeight;
-      if (totalScrollable > 0) {
-        targetProgress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
-      } else {
-        targetProgress = 0;
-      }
+    let projectSnapTimer = null;
+    projectsScroller.addEventListener('scroll', () => {
+      const totalScrollable = projectsScroller.scrollHeight - projectsScroller.clientHeight;
+      targetProgress = totalScrollable > 0
+        ? Math.min(Math.max(projectsScroller.scrollTop / totalScrollable, 0), 1)
+        : 0;
+
+      clearTimeout(projectSnapTimer);
+      projectSnapTimer = setTimeout(() => {
+        if (totalSlots <= 1) return;
+        const snapIndex = Math.round(targetProgress * (totalSlots - 1));
+        const snapProgress = snapIndex / (totalSlots - 1);
+        projectsScroller.scrollTo({
+          top: snapProgress * totalScrollable,
+          behavior: 'smooth'
+        });
+      }, 140);
     }, { passive: true });
 
     // Start render loop
@@ -313,6 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const activeIndex = totalSlots > 1 ? Math.round(currentProgress * (totalSlots - 1)) : 0;
+    if (projectsProgress) {
+      projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
+    }
 
     slots.forEach((slot, index) => {
       const x = totalSlots > 1 ? index - currentProgress * (totalSlots - 1) : 0;
@@ -666,15 +676,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const result = document.getElementById('phone-puzzle-result');
     if (!trigger || !puzzle || !input || !submit || !result) return;
 
-    const contactNumber = '+91 XXXXX XXXXX';
+    const contactNumber = '9153905708';
     const unlock = () => {
-      const answer = input.value.trim();
-      if (answer === '12') {
+      const answer = input.value.trim().replace(/\s+/g, '');
+      if (answer === '16.67') {
         result.textContent = contactNumber;
         result.classList.add('unlocked');
-        trigger.textContent = 'Number unlocked';
+        trigger.textContent = 'Mobile number unlocked';
       } else {
-        result.textContent = 'Not quite. Tiny arithmetic boss fight.';
+        result.textContent = 'Not quite. Hint: Think about all possible outcomes when rolling two dice.';
         result.classList.remove('unlocked');
       }
     };
@@ -691,6 +701,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function initReachForm() {
+    const form = document.getElementById('reach-form');
+    if (!form) return;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const name = (data.get('name') || '').toString().trim();
+      const location = (data.get('location') || '').toString().trim();
+      const building = (data.get('building') || '').toString().trim();
+      const email = (data.get('email') || '').toString().trim();
+      const message = (data.get('message') || '').toString().trim();
+
+      const subject = `Portfolio reach out from ${name || 'someone building something'}`;
+      const body = [
+        'Hey Anmol,',
+        '',
+        `Name: ${name}`,
+        `Location: ${location || 'Not shared'}`,
+        `Email: ${email}`,
+        `What I am building: ${building}`,
+        '',
+        'Message:',
+        message,
+        '',
+        'Sent from anmxlr.github.io'
+      ].join('\n');
+
+      window.location.href = `mailto:anmxlr@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+  }
+
   function initNameWarp() {
     const canvas = document.getElementById('name-warp-canvas');
     if (!canvas) return null;
@@ -701,6 +743,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let time = 0;
     let animId = null;
     let active = false;
+    const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
+    let mobileSizedOnce = false;
 
     class WarpParticle {
       constructor(canvasWidth, canvasHeight, x, y, size) {
@@ -763,13 +807,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resize() {
+      if (isMobileViewport() && mobileSizedOnce) return;
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
       mouse.radius = Math.min(rect.width * 0.15, 110);
       createTextParticles(rect.width, rect.height);
+      if (isMobileViewport()) mobileSizedOnce = true;
     }
 
     function createTextParticles(wFloat, hFloat) {
@@ -894,7 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Trigger redraw when fonts finish loading to ensure correct typeface shapes
     if (document.fonts) {
       document.fonts.ready.then(() => {
-        if (active) resize();
+        if (active && !isMobileViewport()) resize();
       });
     }
 
@@ -909,6 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('touchend', onTouchEnd, { passive: true });
 
     const handleResize = debounce(() => {
+      if (isMobileViewport()) return;
       resize();
     }, 150);
 

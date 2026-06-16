@@ -1167,7 +1167,7 @@ body.scroll-locked {
 .phone-puzzle {
   display: grid;
   gap: 10px;
-  width: min(100%, 320px);
+  width: min(100%, 380px);
   padding: 0;
   max-height: 0;
   opacity: 0;
@@ -1177,7 +1177,7 @@ body.scroll-locked {
 }
 
 .phone-puzzle.active {
-  max-height: 190px;
+  max-height: 230px;
   opacity: 1;
   padding: 14px;
   transform: translateY(0);
@@ -1190,6 +1190,7 @@ body.scroll-locked {
   font-size: 0.78rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.54);
+  line-height: 1.45;
 }
 
 .phone-puzzle-row {
@@ -1239,20 +1240,18 @@ body.scroll-locked {
 /* ── Projects Scroll Track & Section ─────────────── */
 .projects-scroll-track {
   position: relative;
-  height: 380vh;
-  /* Scroll duration */
+  min-height: 100vh;
 }
 
 .projects-section {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  position: relative;
+  min-height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 clamp(1.5rem, 4vw, 3rem);
+  padding: 7rem clamp(1.5rem, 4vw, 3rem);
   z-index: 10;
 }
 
@@ -1273,11 +1272,12 @@ body.scroll-locked {
 }
 
 .projects-title {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2.4rem, 7vw, 5rem);
   font-weight: 900;
   letter-spacing: -0.04em;
   color: #ffffff;
   margin-bottom: 0.75rem;
+  line-height: 0.98;
 }
 
 .projects-title::after {
@@ -1296,40 +1296,59 @@ body.scroll-locked {
   line-height: 1.6;
 }
 
-.projects-progress {
-  position: absolute;
-  right: clamp(1.5rem, 4vw, 3rem);
-  top: 50%;
-  z-index: 10;
-  display: grid;
-  gap: 12px;
-  transform: translateY(-50%);
+.projects-stack-scroller {
+  position: relative;
+  width: min(92vw, 520px);
+  height: min(72vh, 620px);
+  min-height: 520px;
+  z-index: 5;
+  overflow-y: auto;
+  overscroll-behavior: auto;
+  scrollbar-width: none;
+  border-radius: 20px;
+  outline: none;
 }
 
-.projects-progress span {
-  width: 6px;
-  height: 42px;
+.projects-stack-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.projects-stack-stage {
+  position: sticky;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.projects-stack-spacer {
+  height: 1000px;
+  pointer-events: none;
+}
+
+.projects-stack-progress {
+  position: sticky;
+  left: 34px;
+  right: 34px;
+  bottom: 20px;
+  z-index: 20;
+  display: block;
+  height: 3px;
+  margin: -28px 34px 24px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   overflow: hidden;
 }
 
-.projects-progress span::after {
-  content: '';
+.projects-stack-progress span {
   display: block;
   width: 100%;
-  height: 35%;
+  height: 100%;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.65);
-  animation: progressScan 2.4s ease-in-out infinite;
-}
-
-.projects-progress span:nth-child(2)::after { animation-delay: 0.2s; }
-.projects-progress span:nth-child(3)::after { animation-delay: 0.4s; }
-
-@keyframes progressScan {
-  0%, 100% { transform: translateY(-100%); opacity: 0.25; }
-  50% { transform: translateY(220%); opacity: 1; }
+  background: #ffffff;
+  transform: scaleX(0.04);
+  transform-origin: left center;
 }
 
 /* ── 3D Stack Scene ──────────────────────────────── */
@@ -1341,7 +1360,7 @@ body.scroll-locked {
   align-items: center;
   justify-content: center;
   z-index: 5;
-  margin-top: 4rem;
+  margin-top: 0;
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
@@ -2299,20 +2318,35 @@ project-card {
   .projects-stack-scene {
     width: 280px;
     height: 420px;
-    margin-top: 8rem;
+    margin-top: 0;
   }
 
   .projects-scroll-track {
-    height: 400vh;
+    min-height: auto;
   }
 
   .projects-heading {
-    top: 5rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    max-width: 100%;
+    align-self: flex-start;
+    margin-bottom: 2rem;
   }
 
-  .projects-subtitle,
-  .projects-progress {
+  .projects-subtitle {
     display: none;
+  }
+
+  .projects-section {
+    min-height: auto;
+    padding: 5rem 1.25rem;
+  }
+
+  .projects-stack-scroller {
+    width: 100%;
+    height: 560px;
+    min-height: 520px;
   }
 }
 
@@ -2459,6 +2493,100 @@ project-card {
   transform: translateX(4px);
 }
 
+.reach-section {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem clamp(1.5rem, 4vw, 3rem) 7rem;
+}
+
+.reach-title {
+  max-width: 760px;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.reach-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-width: 880px;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(8, 8, 8, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.reach-field {
+  display: grid;
+  gap: 8px;
+}
+
+.reach-field-full {
+  grid-column: 1 / -1;
+}
+
+.reach-field label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.reach-field input,
+.reach-field textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.38);
+  color: #ffffff;
+  padding: 13px 14px;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.reach-field textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.reach-field input:focus,
+.reach-field textarea:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+}
+
+.reach-send {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.reach-send:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(255, 255, 255, 0.12);
+}
+
 @media (max-width: 768px) {
   .name-warp-section {
     min-height: 55vh;
@@ -2473,6 +2601,14 @@ project-card {
     padding: 12px 30px;
     font-size: 0.88rem;
     margin-top: 1rem;
+  }
+
+  .reach-section {
+    padding: 4rem 1.25rem 5rem;
+  }
+
+  .reach-form {
+    grid-template-columns: 1fr;
   }
 }
 
