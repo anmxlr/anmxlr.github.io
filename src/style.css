@@ -19,7 +19,7 @@
   color: #000000 !important;
 }
 
-::-webkit-selection {
+*::-webkit-selection {
   background-color: #d00000 !important;
   color: #000000;
 }
@@ -161,15 +161,6 @@ body.scroll-locked {
   animation-delay: 1.55s;
 }
 
-.intro-line {
-  width: 0;
-  height: 2px;
-  background: #000000;
-  opacity: 0.8;
-  animation: lineExpand 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.75s forwards;
-  will-change: width;
-}
-
 @keyframes letterFadeIn {
   from {
     opacity: 0;
@@ -181,12 +172,6 @@ body.scroll-locked {
     opacity: 1;
     transform: translateY(0) scale(1) rotate(0deg);
     filter: blur(0);
-  }
-}
-
-@keyframes lineExpand {
-  to {
-    width: clamp(100px, 20vw, 200px);
   }
 }
 
@@ -1099,180 +1084,6 @@ body.scroll-locked {
   line-height: 1.5;
 }
 
-/* Life Deep Dive */
-.life-section {
-  position: relative;
-  z-index: 10;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 7rem clamp(1.5rem, 4vw, 3rem) 6rem;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.life-section.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.life-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.28fr);
-  gap: clamp(2rem, 5vw, 4rem);
-  align-items: end;
-  margin-bottom: 2.5rem;
-}
-
-.life-title {
-  max-width: 840px;
-  font-size: clamp(2.4rem, 7vw, 5.4rem);
-  font-weight: 900;
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-  color: #ffffff;
-}
-
-.life-intro {
-  max-width: 700px;
-  margin-top: 1.5rem;
-  color: rgba(255, 255, 255, 0.56);
-  font-size: clamp(1rem, 2vw, 1.16rem);
-  line-height: 1.8;
-}
-
-.life-stamp {
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.012)),
-    rgba(8, 8, 8, 0.74);
-}
-
-.life-stamp span {
-  color: rgba(255, 255, 255, 0.36);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.life-stamp strong {
-  color: #ffffff;
-  font-size: 1.35rem;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-}
-
-.life-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.life-card {
-  position: relative;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: clamp(1.15rem, 2.4vw, 1.6rem);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.014)),
-    rgba(7, 7, 7, 0.78);
-  overflow: hidden;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-}
-
-.life-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.065) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(180deg, #000 0%, transparent 74%);
-  opacity: 0.22;
-  pointer-events: none;
-}
-
-.life-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58);
-}
-
-.life-card-large {
-  grid-column: span 2;
-}
-
-.life-card-wide {
-  grid-column: span 3;
-  min-height: 220px;
-}
-
-.life-card-index,
-.life-card h3,
-.life-card p,
-.life-tags {
-  position: relative;
-  z-index: 1;
-}
-
-.life-card-index {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  color: rgba(255, 255, 255, 0.24);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-}
-
-.life-card h3 {
-  max-width: 520px;
-  margin-bottom: 0.8rem;
-  color: #ffffff;
-  font-size: clamp(1.25rem, 2.5vw, 1.8rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-
-.life-card p {
-  max-width: 760px;
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
-
-.life-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 1.25rem;
-}
-
-.life-tags span {
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
 .footer-right {
   display: flex;
@@ -2454,8 +2265,7 @@ project-card {
   }
 
   .about-section,
-  .lab-section,
-  .life-section {
+  .lab-section {
     padding: 4.5rem 1.25rem;
   }
 
@@ -2479,32 +2289,6 @@ project-card {
 
   .lab-console-text {
     font-size: 1.08rem;
-  }
-
-  .life-hero,
-  .life-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .life-hero {
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .life-title {
-    font-size: clamp(2.25rem, 13vw, 4rem);
-    line-height: 1;
-  }
-
-  .life-stamp {
-    min-height: 124px;
-  }
-
-  .life-card,
-  .life-card-large,
-  .life-card-wide {
-    grid-column: auto;
-    min-height: 240px;
   }
 
   .education-timeline,
@@ -2731,6 +2515,66 @@ project-card {
   max-width: 1200px;
   margin: 0 auto;
   padding: 5rem clamp(1.5rem, 4vw, 3rem) 7rem;
+}
+
+/* ── Animated Me Image ───────────────────────────────── */
+.animated-me-container {
+  width: 50%;
+  max-width: 400px;
+  margin: 0 auto 3rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.animated-me {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.1));
+}
+
+.animated-me:hover {
+  transform: scale(1.05);
+}
+
+.animated-me.animating {
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+/* ── Emoji Explosion Particles ───────────────────────── */
+.emoji-particle {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 1000;
+  animation: explode 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes explode {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot));
+  }
 }
 
 .reach-title {

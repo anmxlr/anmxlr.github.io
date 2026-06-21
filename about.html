@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="anmxlr — personal landing page">
+    <title>know me</title>
+    <!-- Google Fonts for Scrapbook / Typewriter Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Special+Elite&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="src/about.css">
+    <link rel="icon" type="image/svg+xml" href="src/assets/images/logo.svg" />
+    <link rel="shortcut icon" href="src/assets/images/logo.svg" />
+</head>
+
+<body>
+
+    <!-- ── Main Page ────────────────────────────────── -->
+    <div class="main-page" id="main-page">
+
+        <canvas class="constellation-canvas" id="constellation-canvas" aria-hidden="true"></canvas>
+
+        <!-- Top Navigation Bar -->
+        <nav class="top-bar" id="top-bar">
+            <div class="logo">
+                <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="logo-icon">
+                <span>anmxlr ™</span>
+            </div>
+
+            <a href="index.html" class="contact-btn" id="contact-btn">
+                <span>Back</span>
+                <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
+        </nav>
+
+        <!-- ── Hero Section ────────────────────────────── -->
+        <section class="about-hero" id="about-hero">
+            <div class="hero-animated-container">
+                <img id="animated-me" class="hero-animated-image" src="src/assets/images/about/anim-me.PNG"
+                    alt="Animated portrait">
+            </div>
+            <h1 class="about-hero-title">Hey, I'm Anmol Raj</h1>
+            <p class="about-hero-subtitle">A developer, designer, and digital creator. Let me tell you my story.</p>
+        </section>
+
+
+
+        <!-- ── My Journey Section ────────────────────────────– -->
+        <section class="about-content-section" id="journey-section">
+            <div class="section-header">
+                <div class="section-kicker">My Journey</div>
+                <h2 class="section-title">From Code to Creation</h2>
+                <p class="section-description">
+                    My journey has been shaped by curiosity, challenges, and countless learning experiences.
+                </p>
+            </div>
+            <div class="section-content journey-timeline">
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2020</div>
+                        <div class="card-title">Started Coding</div>
+                        <div class="card-description">
+                            Fell in love with web development and started building my first projects. Python and
+                            JavaScript became my languages of choice.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2021-2022</div>
+                        <div class="card-title">Full Stack Development</div>
+                        <div class="card-description">
+                            Dived deep into full-stack development, learning React, Node.js, and database design. Built
+                            several production projects.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">React</span>
+                            <span class="tag">Node.js</span>
+                            <span class="tag">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2023-2024</div>
+                        <div class="card-title">Design & UI Focus</div>
+                        <div class="card-description">
+                            Started exploring design systems, animations, and creating beautiful user experiences.
+                            Merged creativity with engineering.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">UI/UX</span>
+                            <span class="tag">Animations</span>
+                            <span class="tag">Design Systems</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Travelling Section ────────────────────────────– -->
+        <section class="about-content-section hobby-section travel-section" id="travel-section">
+            <div class="section-header">
+                <div class="section-kicker">Hobby // 01</div>
+                <h2 class="section-title">Travelling & Exploring</h2>
+                <p class="section-description">
+                    I love exploring new places, be it solo journeys or adventures with friends. Finding beauty in
+                    different cities and landscapes feeds my digital perspective.
+                </p>
+            </div>
+            <div class="hobby-content">
+                <div class="polaroid travel-polaroid">
+                    <div class="tape-piece tape-top-right"></div>
+                    <div class="polaroid-image-placeholder">
+                        <span class="placeholder-text">[travel photo placeholder]</span>
+                    </div>
+                    <div class="polaroid-caption">somewhere far...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Music Section ────────────────────────────– -->
+        <section class="about-content-section hobby-section music-section" id="music-section">
+            <div class="section-header">
+                <div class="section-kicker">Hobby // 02</div>
+                <h2 class="section-title">Sound & Vibes</h2>
+                <p class="section-description">
+                    Music production and exploring different genres. Synths, lo-fi, and hip-hop are my current
+                    favorites. Click below to experience.
+                </p>
+            </div>
+            <div class="hobby-content">
+                <div class="vinyl-player-container">
+                    <div class="vinyl-player" id="vinyl-player">
+                        <div class="vinyl-sleeve">
+                            <img src="src/assets/images/about/Inrainbowscover.png" alt="In Rainbows Cover"
+                                class="sleeve-img">
+                            <div class="play-overlay">
+                                <svg class="play-icon" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                                <svg class="pause-icon" viewBox="0 0 24 24">
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vinyl-disk-wrapper">
+                            <img src="src/assets/images/about/vinyl.png" alt="Vinyl Record" class="vinyl-disk-img">
+                        </div>
+                        <audio id="vinyl-audio" src="src/assets/audio/wierdfishes.mp3" loop></audio>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Reading Section ────────────────────────────– -->
+        <section class="about-content-section hobby-section reading-section" id="reading-section">
+            <div class="section-header">
+                <div class="section-kicker">Hobby // 03</div>
+                <h2 class="section-title">Reading & Philosophy</h2>
+                <p class="section-description">
+                    Philosophy, sci-fi, and design books fuel my imagination. Currently reading about creative systems,
+                    complexity, and human psychology.
+                </p>
+            </div>
+        </section>
+
+        <!-- ── Digital Art Section ────────────────────────────– -->
+        <section class="about-content-section hobby-section art-section" id="art-section">
+            <div class="section-header">
+                <div class="section-kicker">Hobby // 04</div>
+                <h2 class="section-title">Digital Art & Design</h2>
+                <p class="section-description">
+                    Experimenting with digital painting, code sketching, and generative art. Love the overlap of system
+                    architecture and visual creativity.
+                </p>
+            </div>
+            <div class="hobby-content">
+                <div class="polaroid art-polaroid">
+                    <div class="tape-piece tape-top-left"></div>
+                    <div class="polaroid-image-placeholder">
+                        <span class="placeholder-text">[digital art placeholder]</span>
+                    </div>
+                    <div class="polaroid-caption">pixels & vectors</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Sidequests Section ────────────────────────────– -->
+        <section class="about-content-section" id="sidequests-section">
+            <div class="section-header">
+                <div class="section-kicker">Sidequests</div>
+                <h2 class="section-title">Fun Projects & Experiments</h2>
+                <p class="section-description">
+                    Beyond my main work, I pursue passion projects and experimental ideas.
+                </p>
+            </div>
+            <div class="section-content sidequests-list">
+                <div class="sidequest-item item-left">
+                    <div class="sidequest-num">[01]</div>
+                    <div class="sidequest-body">
+                        <div class="sidequest-label">Open Source</div>
+                        <h3 class="sidequest-title">Contributing</h3>
+                        <p class="sidequest-description">
+                            Active contributor to open-source projects. Believe in building tools that help the developer community.
+                        </p>
+                        <div class="sidequest-tags">
+                            <span class="tag">GitHub</span>
+                            <span class="tag">Documentation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidequest-item item-right">
+                    <div class="sidequest-num">[02]</div>
+                    <div class="sidequest-body">
+                        <div class="sidequest-label">Writing</div>
+                        <h3 class="sidequest-title">Tech Articles</h3>
+                        <p class="sidequest-description">
+                            Writing about web development, design, and creative coding. Sharing knowledge and experiences.
+                        </p>
+                        <div class="sidequest-tags">
+                            <span class="tag">Blog</span>
+                            <span class="tag">Tutorials</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidequest-item item-left">
+                    <div class="sidequest-num">[03]</div>
+                    <div class="sidequest-body">
+                        <div class="sidequest-label">Experiments</div>
+                        <h3 class="sidequest-title">Pushing Limits</h3>
+                        <p class="sidequest-description">
+                            Testing new technologies and frameworks. WebGL, AI integration, and browser APIs are my current playgrounds.
+                        </p>
+                        <div class="sidequest-tags">
+                            <span class="tag">WebGL</span>
+                            <span class="tag">Cutting Edge</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidequest-item item-right">
+                    <div class="sidequest-num">[04]</div>
+                    <div class="sidequest-body">
+                        <div class="sidequest-label">Learning</div>
+                        <h3 class="sidequest-title">Always Growing</h3>
+                        <p class="sidequest-description">
+                            Exploring new skills like 3D modeling, AI/ML, and advanced animation techniques to expand my toolkit.
+                        </p>
+                        <div class="sidequest-tags">
+                            <span class="tag">3D</span>
+                            <span class="tag">ML</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidequest-item item-center surfing-item">
+                    <div class="sidequest-num">[05]</div>
+                    <div class="sidequest-body">
+                        <div class="sidequest-label">Sidequest</div>
+                        <h3 class="sidequest-title">Surfing & Waves</h3>
+                        <p class="sidequest-description">
+                            Catching waves and getting away from the screen. Balance, patience, and ocean flow.
+                        </p>
+                        <div class="polaroid surfing-polaroid">
+                            <div class="tape-piece tape-top-right"></div>
+                            <div class="polaroid-image-placeholder">
+                                <span class="placeholder-text">[surfing photo placeholder]</span>
+                            </div>
+                            <div class="polaroid-caption">ocean therapy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Currently Doing Section ────────────────────────────– -->
+        <section class="about-content-section" id="currently-section">
+            <div class="section-header">
+                <div class="section-kicker">Currently Doing</div>
+                <h2 class="section-title">What's on My Plate</h2>
+                <p class="section-description">
+                    Here's what I'm actively working on and excited about right now.
+                </p>
+            </div>
+            
+            <div class="plate-logbook">
+                <div class="plate-item">
+                    <span class="plate-status">[/]</span>
+                    <div class="plate-body">
+                        <div class="plate-header">
+                            <span class="plate-title">Design System</span>
+                            <span class="plate-subtitle">React Components</span>
+                        </div>
+                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ [65%]</span>
+                    </div>
+                </div>
+                <div class="plate-item">
+                    <span class="plate-status">[/]</span>
+                    <div class="plate-body">
+                        <div class="plate-header">
+                            <span class="plate-title">Three.js / 3D Graphics</span>
+                            <span class="plate-subtitle">Web Graphics Exploration</span>
+                        </div>
+                        <span class="plate-progress">▮▮▮▮▯? ? ? [45%]</span>
+                    </div>
+                </div>
+                <div class="plate-item">
+                    <span class="plate-status">[ ]</span>
+                    <div class="plate-body">
+                        <div class="plate-header">
+                            <span class="plate-title">AI Integrations</span>
+                            <span class="plate-subtitle">Exploring LLM APIs</span>
+                        </div>
+                        <span class="plate-progress">▮▮▮▮▮▯? ? ? [50%]</span>
+                    </div>
+                </div>
+                <div class="plate-item">
+                    <span class="plate-status">[x]</span>
+                    <div class="plate-body">
+                        <div class="plate-header">
+                            <span class="plate-title">Personal Branding</span>
+                            <span class="plate-subtitle">Content & Community</span>
+                        </div>
+                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ [55%]</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reach Out Section -->
+        <section class="reach-section" id="reach-section">
+            <div class="section-kicker">Reach Out</div>
+            <h2 class="reach-title">Send me a clean brief.</h2>
+            <form class="reach-form" id="reach-form">
+                <div class="reach-field">
+                    <label for="reach-name">Name</label>
+                    <input id="reach-name" name="name" autocomplete="name" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-location">Location</label>
+                    <input id="reach-location" name="location" autocomplete="address-level2">
+                </div>
+                <div class="reach-field">
+                    <label for="reach-building">What you are building</label>
+                    <input id="reach-building" name="building" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-email">Email ID</label>
+                    <input id="reach-email" name="email" type="email" autocomplete="email" required>
+                </div>
+                <div class="reach-field reach-field-full">
+                    <label for="reach-message">Message for me</label>
+                    <textarea id="reach-message" name="message" rows="5" required></textarea>
+                </div>
+                <button class="reach-send" type="submit">Send message</button>
+            </form>
+        </section>
+
+        <!-- ── Footer ─────────────────────────────── -->
+        <footer class="footer" id="footer">
+            <div class="footer-divider"></div>
+            <div class="postcard-footer">
+                <div class="postcard-left">
+                    <div class="postcard-msg">
+                        <p class="handwritten">Hey traveler,</p>
+                        <p class="handwritten">Thanks for scrolling to the end of my scrapbook. If you enjoyed the story, let's build something beautiful.</p>
+                        <p class="handwritten signature">Anmol Raj</p>
+                    </div>
+                    <div class="postcard-meta">
+                        <p class="typewriter">SYSTEM: anmxlr.sys // 2026</p>
+                        <p class="typewriter-sub">© All rights reserved.</p>
+                    </div>
+                </div>
+                <div class="postcard-right">
+                    <div class="postage-stamp">
+                        <img src="src/assets/images/logo.svg" alt="Postage Stamp icon" class="stamp-logo-img">
+                        <div class="stamp-holes"></div>
+                    </div>
+                    <div class="postcard-address">
+                        <div class="address-line line-to">To: Anyone building cool things</div>
+                        <div class="address-line">Loc: Everywhere, Earth</div>
+                        <div class="address-line link-line">
+                            <a href="https://github.com/anmxlr" class="post-link" target="_blank">[GitHub]</a>
+                            <a href="https://www.linkedin.com/in/anmol-raj-026700313/" class="post-link" target="_blank">[LinkedIn]</a>
+                            <a href="mailto:anmxlr@gmail.com" class="post-link">[Email]</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Film grain texture overlay -->
+        <div class="grain"></div>
+    </div>
+
+    <!-- SVG Distressed Ink Stamp Filter -->
+    <svg style="width:0; height:0; position:absolute; pointer-events:none;" aria-hidden="true">
+        <filter id="distressed-stamp">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8.5" />
+            <feComposite operator="in" in2="SourceGraphic" />
+        </filter>
+    </svg>
+
+    <script src="src/about.js"></script>
+</body>
+
+</html>

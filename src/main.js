@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEasterEggs();
   initPhonePuzzle();
   initReachForm();
+  initAnimatedMe();
 
   // Shared mouse move listener for 3D parallax, mouse-glow orb, and custom cursor
   window.addEventListener('mousemove', (e) => {
@@ -194,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const experienceSection = document.getElementById('experience-section');
   const aboutSection = document.getElementById('about-section');
   const labSection = document.getElementById('lab-section');
-  const lifeSection = document.getElementById('life-section');
   const footerContent = document.querySelector('.footer-content');
 
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -217,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (experienceSection) revealObserver.observe(experienceSection);
   if (aboutSection) revealObserver.observe(aboutSection);
   if (labSection) revealObserver.observe(labSection);
-  if (lifeSection) revealObserver.observe(lifeSection);
   if (nameWarpSection) revealObserver.observe(nameWarpSection);
   if (footerContent) revealObserver.observe(footerContent);
 
@@ -733,6 +732,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.location.href = `mailto:anmxlr@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     });
+  }
+
+  function initAnimatedMe() {
+    const animatedMe = document.getElementById('animated-me');
+    if (!animatedMe) return;
+
+    const emojis = ['🚀', '💻', '🎨', '✨', '🔥', '💡', '🎯', '⚡', '🌟', '🎮', '🎵', '📱', '🔮', '🎪', '🎭'];
+    let isAnimating = false;
+
+    animatedMe.addEventListener('mouseenter', () => {
+      if (isAnimating) return;
+      isAnimating = true;
+      animatedMe.classList.add('animating');
+
+      // Explode emojis after a short delay
+      setTimeout(() => {
+        const rect = animatedMe.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        emojis.forEach((emoji, index) => {
+          setTimeout(() => {
+            createEmojiParticle(emoji, centerX, centerY);
+          }, index * 50);
+        });
+
+        // Stop animation after emoji explosion
+        setTimeout(() => {
+          animatedMe.classList.remove('animating');
+          isAnimating = false;
+        }, emojis.length * 50 + 1500);
+      }, 300);
+    });
+  }
+
+  function createEmojiParticle(emoji, startX, startY) {
+    const particle = document.createElement('div');
+    particle.className = 'emoji-particle';
+    particle.textContent = emoji;
+    
+    // Random explosion direction
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 150 + Math.random() * 100;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    const rotation = Math.random() * 720 - 360;
+
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    particle.style.setProperty('--rot', `${rotation}deg`);
+
+    document.body.appendChild(particle);
+
+    // Remove particle after animation
+    setTimeout(() => {
+      particle.remove();
+    }, 1500);
   }
 
   function initNameWarp() {
