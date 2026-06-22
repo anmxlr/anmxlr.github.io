@@ -5,6 +5,61 @@ if (history.scrollRestoration) {
 window.scrollTo(0, 0);
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Tap Sound ─────────────────────────────────────
+  const tapAudioSrc = 'src/assets/audio/tap.mp3';
+  const tapPool = [];
+  const TAP_POOL_SIZE = 6;
+  for (let i = 0; i < TAP_POOL_SIZE; i++) {
+    const a = new Audio(tapAudioSrc);
+    a.volume = 0.35;
+    tapPool.push(a);
+  }
+  let tapIndex = 0;
+
+  function playTap(volume) {
+    const a = tapPool[tapIndex];
+    tapIndex = (tapIndex + 1) % TAP_POOL_SIZE;
+    a.volume = volume !== undefined ? volume : 0.35;
+    a.currentTime = 0;
+    a.play().catch(() => {});
+  }
+
+  // ── Tap Sound on Interactive Elements ──────────────
+  window.addEventListener('click', (e) => {
+    const hit = e.target.closest('a, button, input[type="submit"], input[type="button"], .logo, [role="button"], project-card, .connect-btn, .signal-panel, .chip');
+    if (hit) {
+      playTap(0.35);
+    }
+  });
+
+  // ── Passport System ────────────────────────────────
+  window.unlockPassportStamp = function (key) {
+    if (localStorage.getItem(`passport_stamp_${key}`) === 'unlocked') return;
+    localStorage.setItem(`passport_stamp_${key}`, 'unlocked');
+    
+    // Play double thud stamp sound
+    playTap(0.7);
+    setTimeout(() => playTap(0.55), 80);
+
+    // Show toast
+    showPassportToast(key);
+  };
+
+  function showPassportToast(key) {
+    const toast = document.createElement('div');
+    toast.className = 'passport-toast';
+    toast.innerHTML = `
+      <span class="toast-kicker">Passport Stamp Earned</span>
+      <span class="toast-title">${key.toUpperCase()}</span>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3200);
+  }
+
   const introScreen = document.getElementById('intro-screen');
   const mainPage = document.getElementById('main-page');
   const topBar = document.getElementById('top-bar');
@@ -222,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Async function to load projects and initialize scroll behavior
   async function loadProjects() {
-    if (!projectsTrack || !projectsStack || !projectsScroller || !projectsSpacer) return;
+    if (!projectsTrack || !projectsStack || !projectsScroller) return;
 
     let projects = [];
     try {
@@ -250,7 +305,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    projectsSpacer.style.height = totalSlots > 1 ? `${Math.max(900, totalSlots * 360)}px` : '100%';
+    // Dynamic track height for desktop scroll-pinning (e.g. 100vh per project)
+    function handleResize() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        projectsTrack.style.height = 'auto';
+      } else {
+        projectsTrack.style.height = `${window.innerHeight + (totalSlots - 1) * window.innerHeight * 0.95}px`;
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    handleResize();
 
     // Clear and inject slots
     projectsStack.innerHTML = '';
@@ -275,23 +340,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     slots = document.querySelectorAll('.stack-slot');
 
-    let projectSnapTimer = null;
-    projectsScroller.addEventListener('scroll', () => {
-      const totalScrollable = projectsScroller.scrollHeight - projectsScroller.clientHeight;
-      targetProgress = totalScrollable > 0
-        ? Math.min(Math.max(projectsScroller.scrollTop / totalScrollable, 0), 1)
-        : 0;
+    let pageSnapTimer = null;
 
-      clearTimeout(projectSnapTimer);
-      projectSnapTimer = setTimeout(() => {
-        if (totalSlots <= 1) return;
-        const snapIndex = Math.round(targetProgress * (totalSlots - 1));
-        const snapProgress = snapIndex / (totalSlots - 1);
-        projectsScroller.scrollTo({
-          top: snapProgress * totalScrollable,
-          behavior: 'smooth'
-        });
-      }, 140);
+    // Desktop Page Scroll (Sticky Pinning) logic
+    window.addEventListener('scroll', () => {
+      if (window.innerWidth <= 768) return; // Handled by inner horizontal scroll on mobile
+
+      const trackRect = projectsTrack.getBoundingClientRect();
+      const trackHeight = trackRect.height - window.innerHeight;
+      if (trackHeight <= 0) return;
+
+      const scrolled = -trackRect.top;
+      const progress = Math.min(Math.max(scrolled / trackHeight, 0), 1);
+      targetProgress = progress;
+
+      // Heavy Snapping Gravity Lock
+      clearTimeout(pageSnapTimer);
+      if (trackRect.top <= 80 && trackRect.bottom >= window.innerHeight - 80) {
+        pageSnapTimer = setTimeout(() => {
+          if (totalSlots <= 1) return;
+          const snapIndex = Math.round(targetProgress * (totalSlots - 1));
+          const snapProgress = snapIndex / (totalSlots - 1);
+          const snapScrollTop = window.scrollY + trackRect.top + (snapProgress * trackHeight);
+          
+          window.scrollTo({
+            top: snapScrollTop,
+            behavior: 'smooth'
+          });
+        }, 250); // Gravity locks in after 250ms of scroll idle
+      }
+    }, { passive: true });
+
+    // Mobile Horizontal Scroll logic
+    projectsScroller.addEventListener('scroll', () => {
+      if (window.innerWidth > 768) return; // Handled by page scroll on desktop
+
+      const maxScroll = projectsScroller.scrollWidth - projectsScroller.clientWidth;
+      targetProgress = maxScroll > 0 ? projectsScroller.scrollLeft / maxScroll : 0;
     }, { passive: true });
 
     // Start render loop
@@ -303,36 +388,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Animation Loop (lerps scroll progress, custom cursor ring, and parallax coordinates)
   function renderLoop() {
-    currentProgress += (targetProgress - currentProgress) * 0.08;
-    currentMouseX += (targetMouseX - currentMouseX) * 0.05;
-    currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+    const isMobile = window.innerWidth <= 768;
 
-    // Grid animation with velocity-driven speedup
-    const speed = 0.4 + Math.abs(targetProgress - currentProgress) * 25;
-    gridOffset = (gridOffset + speed) % 60;
+    if (isMobile) {
+      // Lerp progress bar for smoothness on mobile
+      currentProgress += (targetProgress - currentProgress) * 0.15;
+      if (projectsProgress) {
+        projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
+      }
+      // Reset 3D transform values for clean layout flow on mobile
+      slots.forEach(slot => {
+        slot.style.transform = '';
+        slot.style.opacity = '';
+        slot.style.filter = '';
+        slot.style.pointerEvents = 'auto';
+      });
+    } else {
+      // Desktop 3D stack physics and transformations
+      currentProgress += (targetProgress - currentProgress) * 0.08;
+      currentMouseX += (targetMouseX - currentMouseX) * 0.05;
+      currentMouseY += (targetMouseY - currentMouseY) * 0.05;
 
-    const bounce = totalSlots > 1 ? Math.abs(Math.sin(currentProgress * Math.PI * (totalSlots - 1))) : 0;
+      const speed = 0.4 + Math.abs(targetProgress - currentProgress) * 25;
+      gridOffset = (gridOffset + speed) % 60;
 
-    if (bgCircles) {
-      bgCircles.style.transform = `rotate(${currentProgress * 80 + currentMouseX * 30}deg) translate3d(${currentMouseX * 35}px, ${currentMouseY * 35}px, 0) scale(${1 + bounce * 0.06})`;
+      const bounce = totalSlots > 1 ? Math.abs(Math.sin(currentProgress * Math.PI * (totalSlots - 1))) : 0;
+
+      if (bgCircles) {
+        bgCircles.style.transform = `rotate(${currentProgress * 80 + currentMouseX * 30}deg) translate3d(${currentMouseX * 35}px, ${currentMouseY * 35}px, 0) scale(${1 + bounce * 0.06})`;
+      }
+      if (bgGrid) {
+        bgGrid.style.transform = `perspective(600px) rotateX(${65 + currentMouseY * 12}deg) rotateY(${currentMouseX * 12}deg) translateY(${gridOffset}px)`;
+      }
+
+      const activeIndex = totalSlots > 1 ? Math.round(currentProgress * (totalSlots - 1)) : 0;
+      if (projectsProgress) {
+        projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
+      }
+
+      slots.forEach((slot, index) => {
+        const x = totalSlots > 1 ? index - currentProgress * (totalSlots - 1) : 0;
+        const absX = Math.abs(x);
+        slot.style.transform = `translate3d(${x * 125}%, ${absX * 20}px, 0) rotateY(${x * -18}deg) skewX(${x * -5}deg) scale(${1 - Math.min(absX * 0.08, 0.2)})`;
+        slot.style.opacity = Math.max(0, 1 - absX * 0.65);
+        slot.style.filter = absX > 0.1 ? `blur(${Math.min(absX * 2, 4)}px)` : 'none';
+        
+        const isActive = index === activeIndex;
+        slot.classList.toggle('active', isActive);
+        slot.style.pointerEvents = isActive ? 'auto' : 'none';
+      });
     }
-    if (bgGrid) {
-      bgGrid.style.transform = `perspective(600px) rotateX(${65 + currentMouseY * 12}deg) rotateY(${currentMouseX * 12}deg) translateY(${gridOffset}px)`;
-    }
-
-    const activeIndex = totalSlots > 1 ? Math.round(currentProgress * (totalSlots - 1)) : 0;
-    if (projectsProgress) {
-      projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
-    }
-
-    slots.forEach((slot, index) => {
-      const x = totalSlots > 1 ? index - currentProgress * (totalSlots - 1) : 0;
-      const absX = Math.abs(x);
-      slot.style.transform = `translate3d(${x * 125}%, ${absX * 20}px, 0) rotateY(${x * -18}deg) skewX(${x * -5}deg) scale(${1 - Math.min(absX * 0.08, 0.2)})`;
-      slot.style.opacity = Math.max(0, 1 - absX * 0.65);
-      slot.style.filter = absX > 0.1 ? `blur(${Math.min(absX * 2, 4)}px)` : 'none';
-      slot.classList.toggle('active', index === activeIndex);
-    });
 
     // Animate mouse follow glow orb
     if (glowPrimary) {
@@ -571,6 +676,10 @@ document.addEventListener('DOMContentLoaded', () => {
       overlay.classList.add('active');
       overlay.setAttribute('aria-hidden', 'false');
       setTimeout(() => input.focus(), 80);
+      
+      if (typeof window.unlockPassportStamp === 'function') {
+        window.unlockPassportStamp('hacker');
+      }
     };
     const closeTerminal = () => {
       overlay.classList.remove('active');
@@ -684,6 +793,10 @@ document.addEventListener('DOMContentLoaded', () => {
         result.textContent = contactNumber;
         result.classList.add('unlocked');
         trigger.textContent = 'Mobile number unlocked';
+        
+        if (typeof window.unlockPassportStamp === 'function') {
+          window.unlockPassportStamp('investigator');
+        }
       } else {
         result.textContent = 'Not quite. Hint: Think about all possible outcomes when rolling two dice.';
         result.classList.remove('unlocked');

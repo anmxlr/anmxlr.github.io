@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hover on interactive elements
     window.addEventListener('mouseover', (e) => {
-      const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link');
+      const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link, .decor-image');
       cursorEl.classList.toggle('hovering', !!hit);
     });
 
@@ -171,6 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', () => playTap(0.25));
   });
 
+  // Music collage items
+  document.querySelectorAll('.collage-item').forEach(item => {
+    item.addEventListener('click', () => playTap(0.25));
+  });
+
   // Form submit button
   const reachSend = document.querySelector('.reach-send');
   if (reachSend) {
@@ -185,6 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Vinyl Player ──────────────────────────────────
   initVinylPlayer();
+
+  // ── Passport System ────────────────────────────────
+  initPassport();
+
+  // ── Draggable Scrapbook Stickers ───────────────────
+  initDraggableDecor();
+
+  // ── Decor Fly Out from Brain ───────────────────────
+  initDecorFlyOut();
 
   // ── Section Reveal on Scroll ──────────────────────
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -299,37 +313,107 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatedMe = document.getElementById('animated-me');
     if (!animatedMe) return;
 
-    const chars = ['*', '+', 'x', 'o', '?', '!', '~', 'a', 'n', 'm', 'x', 'l', 'r'];
-    let isAnimating = false;
+    const frames = [
+      'src/assets/images/about/1.PNG',
+      'src/assets/images/about/2.PNG',
+      'src/assets/images/about/3.PNG',
+      'src/assets/images/about/4.PNG',
+      'src/assets/images/about/5.PNG'
+    ];
+
+    // Preload frames to prevent flicker
+    frames.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    let intervalId = null;
+    let currentFrame = 0; // 0 to 4
+    let direction = 1; // 1 = forward, -1 = backward
+    let isHovered = false;
+    let clickLoopActive = false; // true if running a click-induced loop (1 -> 5 -> 1)
+
+    function startAnimation() {
+      if (intervalId) return; // already running
+      
+      animatedMe.classList.add('animating');
+      
+      intervalId = setInterval(() => {
+        currentFrame += direction;
+        
+        if (direction === 1) {
+          if (currentFrame >= frames.length - 1) {
+            currentFrame = frames.length - 1;
+            
+            if (clickLoopActive) {
+              // Click loop: reached the top, now go back
+              direction = -1;
+            } else if (isHovered) {
+              // Hover: hold at frame 5, stop interval
+              clearInterval(intervalId);
+              intervalId = null;
+            } else {
+              // Left hover while animating up: go back
+              direction = -1;
+            }
+          }
+        } else {
+          // direction === -1
+          if (currentFrame <= 0) {
+            currentFrame = 0;
+            clearInterval(intervalId);
+            intervalId = null;
+            clickLoopActive = false;
+            animatedMe.classList.remove('animating');
+          }
+        }
+        
+        animatedMe.src = frames[currentFrame];
+      }, 100);
+    }
 
     animatedMe.addEventListener('mouseenter', () => {
-      if (isAnimating) return;
-      isAnimating = true;
-      playTap(0.3);
-      animatedMe.classList.add('animating');
+      isHovered = true;
+      clickLoopActive = false; // Hover overrides click loop
+      direction = 1;
+      startAnimation();
+    });
 
-      setTimeout(() => {
-        const rect = animatedMe.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+    animatedMe.addEventListener('mouseleave', () => {
+      isHovered = false;
+      if (!clickLoopActive) {
+        direction = -1;
+        startAnimation();
+      }
+    });
 
-        // Choose 8 random characters to launch
-        const chosenChars = [];
-        for (let i = 0; i < 8; i++) {
-          chosenChars.push(chars[Math.floor(Math.random() * chars.length)]);
-        }
+    animatedMe.addEventListener('click', () => {
+      // Typewriter Particle Burst
+      const rect = animatedMe.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
 
-        chosenChars.forEach((char, index) => {
-          setTimeout(() => {
-            createTypewriterParticle(char, centerX, centerY);
-          }, index * 50);
-        });
+      const chars = ['*', '+', 'x', 'o', '?', '!', '~', 'a', 'n', 'm', 'x', 'l', 'r'];
+      const chosenChars = [];
+      for (let i = 0; i < 8; i++) {
+        chosenChars.push(chars[Math.floor(Math.random() * chars.length)]);
+      }
 
+      chosenChars.forEach((char, index) => {
         setTimeout(() => {
-          animatedMe.classList.remove('animating');
-          isAnimating = false;
-        }, chosenChars.length * 50 + 1500);
-      }, 300);
+          createTypewriterParticle(char, centerX, centerY);
+        }, index * 50);
+      });
+
+      // Play click sound
+      playTap(0.35);
+
+      // If clicked and not hovered (like mobile tap), run a full cycle 1 -> 5 -> 1
+      if (!isHovered) {
+        clickLoopActive = true;
+        direction = 1;
+        startAnimation();
+      }
     });
   }
 
@@ -417,7 +501,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Click on sleeve to toggle play/pause
     sleeve.addEventListener('click', (e) => {
-      playTap(0.4);
+      e.stopPropagation();
+      if (window.unlockPassportStamp) {
+        window.unlockPassportStamp('melophile');
+      }
       const isPlaying = player.classList.contains('playing');
       if (!isPlaying) {
         player.classList.add('playing');
@@ -440,6 +527,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle scratching / dragging the vinyl disk
     diskImg.addEventListener('mousedown', (e) => {
       if (!player.classList.contains('playing')) return;
+
+      if (window.unlockPassportStamp) {
+        window.unlockPassportStamp('melophile');
+      }
 
       isDragging = true;
       diskImg.classList.add('scratching');
@@ -497,11 +588,212 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function initPassport() {
+    const stamps = {
+      melophile: document.getElementById('stamp-melophile'),
+      hacker: document.getElementById('stamp-hacker'),
+      investigator: document.getElementById('stamp-investigator')
+    };
+
+    function updateStampVisuals(key) {
+      const el = stamps[key];
+      if (!el) return;
+      const isUnlocked = localStorage.getItem(`passport_stamp_${key}`) === 'unlocked';
+      if (isUnlocked && !el.classList.contains('unlocked')) {
+        el.classList.add('unlocked');
+        const statusSpan = el.querySelector('.stamp-status');
+        if (statusSpan) statusSpan.textContent = 'PASSED';
+      }
+    }
+
+    // Initial load
+    Object.keys(stamps).forEach(updateStampVisuals);
+
+    // Expose unlock function globally for page actions
+    window.unlockPassportStamp = function (key) {
+      if (localStorage.getItem(`passport_stamp_${key}`) === 'unlocked') return;
+      localStorage.setItem(`passport_stamp_${key}`, 'unlocked');
+      
+      // Play double thud stamp sound
+      if (typeof playTap === 'function') {
+        playTap(0.7);
+        setTimeout(() => playTap(0.55), 80);
+      }
+
+      // Show toast
+      showPassportToast(key);
+
+      // Update element
+      updateStampVisuals(key);
+    };
+  }
+
+  function showPassportToast(key) {
+    const toast = document.createElement('div');
+    toast.className = 'passport-toast';
+    toast.innerHTML = `
+      <span class="toast-kicker">Passport Stamp Earned</span>
+      <span class="toast-title">${key.toUpperCase()}</span>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3200);
+  }
+
   function debounce(func, delay) {
     let timeout;
     return function (...args) {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), delay);
     };
+  }
+
+  // ── Drag & Drop Decor Images ──────────────────────
+  function initDraggableDecor() {
+    const decorImages = document.querySelectorAll('.decor-image');
+    
+    decorImages.forEach(el => {
+      // Prevent default browser image dragging
+      el.addEventListener('dragstart', (e) => e.preventDefault());
+      
+      el.addEventListener('mousedown', startDrag);
+      el.addEventListener('touchstart', startDrag, { passive: false });
+    });
+    
+    function startDrag(e) {
+      // Only drag with left mouse button click
+      if (e.type === 'mousedown' && e.button !== 0) return;
+      
+      const el = this;
+      
+      // Play a soft tap sound when grabbing the sticker
+      if (typeof playTap === 'function') {
+        playTap(0.3);
+      }
+      
+      // Get positions
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      
+      const rect = el.getBoundingClientRect();
+      const parentRect = el.offsetParent ? el.offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
+      
+      // Absolute positioning relative to offsets
+      let currentLeft = rect.left - parentRect.left;
+      let currentTop = rect.top - parentRect.top;
+      
+      // Remove right and bottom offsets
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.left = currentLeft + 'px';
+      el.style.top = currentTop + 'px';
+      
+      const shiftX = clientX - rect.left;
+      const shiftY = clientY - rect.top;
+      
+      // Temporarily raise Z-index and cursor class
+      el.style.zIndex = '1000';
+      el.classList.add('dragging');
+      
+      function moveAt(clientX, clientY) {
+        let x = clientX - parentRect.left - shiftX;
+        let y = clientY - parentRect.top - shiftY;
+        
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+      }
+      
+      function onMouseMove(e) {
+        const moveX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const moveY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        moveAt(moveX, moveY);
+      }
+      
+      if (e.type === 'touchstart') {
+        document.addEventListener('touchmove', onMouseMove, { passive: false });
+        document.addEventListener('touchend', onMouseUp);
+      } else {
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+      
+      function onMouseUp() {
+        el.classList.remove('dragging');
+        el.style.zIndex = '16'; // Keep it slightly higher than normal so it sits above non-dragged items
+        
+        // Play soft tap sound on drop
+        if (typeof playTap === 'function') {
+          playTap(0.25);
+        }
+        
+        if (e.type === 'touchstart') {
+          document.removeEventListener('touchmove', onMouseMove);
+          document.removeEventListener('touchend', onMouseUp);
+        } else {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+      }
+    }
+  }
+
+  // ── Decor Fly Out from Brain ───────────────────────
+  function initDecorFlyOut() {
+    const animatedMe = document.getElementById('animated-me');
+    const decorImages = document.querySelectorAll('.decor-image');
+    if (!animatedMe || decorImages.length === 0) return;
+
+    let hasSpread = false;
+
+    // Calculate and set initial state (condensed inside the brain)
+    function setupInitialState() {
+      if (hasSpread) return;
+
+      const meRect = animatedMe.getBoundingClientRect();
+      const brainX = meRect.left + meRect.width / 2;
+      const brainY = meRect.top + meRect.height * 0.3; // head/brain area
+
+      decorImages.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const elCenterX = rect.left + rect.width / 2;
+        const elCenterY = rect.top + rect.height / 2;
+
+        const deltaX = brainX - elCenterX;
+        const deltaY = brainY - elCenterY;
+
+        el.style.transition = 'none';
+        el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0)`;
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+      });
+    }
+
+    // Wait for everything to load and layout to stabilize before calculating coordinates
+    window.addEventListener('load', setupInitialState);
+    // Also run immediately just in case load already fired
+    setTimeout(setupInitialState, 200);
+
+    // Hover listener to trigger the spread
+    animatedMe.addEventListener('mouseenter', () => {
+      if (hasSpread) return;
+      hasSpread = true;
+
+      // Staggered fly out
+      decorImages.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.transition = 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.6s ease, filter 0.4s ease';
+          el.style.transform = '';
+          el.style.opacity = '';
+          
+          // Enable mouse events/drag-and-drop after animation completes
+          setTimeout(() => {
+            el.style.pointerEvents = 'auto';
+          }, 1600);
+        }, index * 60);
+      });
+    });
   }
 });

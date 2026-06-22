@@ -9,6 +9,12 @@
   box-sizing: border-box;
 }
 
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
 *::selection {
   background-color: #d00000 !important;
   color: #000000 !important;
@@ -1030,6 +1036,32 @@ body.scroll-locked {
   margin-bottom: 3rem;
 }
 
+/* Peeking Cat Animation */
+.peeking-cat-container {
+  position: absolute;
+  top: 0;
+  right: 12%;
+  width: 70px;
+  height: 52px;
+  transform: translateY(-100%);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.peeking-cat {
+  width: 100%;
+  height: auto;
+  display: block;
+  transform: translateY(100%);
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+  filter: grayscale(100%) contrast(1.2);
+}
+
+.footer:hover .peeking-cat {
+  transform: translateY(0);
+}
+
 .footer-content {
   display: flex;
   align-items: flex-start;
@@ -1229,6 +1261,7 @@ body.scroll-locked {
 }
 
 /* ── Projects Scroll Track & Section ─────────────── */
+/* ── Projects Scroll Track & Section ─────────────── */
 .projects-scroll-track {
   position: relative;
   min-height: 100vh;
@@ -1244,6 +1277,27 @@ body.scroll-locked {
   align-items: center;
   padding: 7rem clamp(1.5rem, 4vw, 3rem);
   z-index: 10;
+}
+
+/* Page-level sticky pinning on desktop (screens > 768px) */
+@media (min-width: 769px) {
+  .projects-section {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+  }
+
+  .projects-stack-scroller {
+    overflow: visible !important;
+    height: auto !important;
+    width: auto !important;
+    min-height: auto !important;
+  }
+
+  .projects-stack-spacer {
+    display: none !important;
+  }
 }
 
 .projects-heading {
@@ -1293,15 +1347,68 @@ body.scroll-locked {
   height: min(72vh, 620px);
   min-height: 520px;
   z-index: 5;
-  overflow-y: auto;
-  overscroll-behavior: auto;
-  scrollbar-width: none;
-  border-radius: 20px;
   outline: none;
 }
 
-.projects-stack-scroller::-webkit-scrollbar {
-  display: none;
+/* Horizontal swipe-scrolling style for mobile screens */
+@media (max-width: 768px) {
+  .projects-section {
+    min-height: auto;
+    height: auto;
+    padding: 6.5rem 1.25rem 4.5rem;
+    align-items: stretch;
+  }
+
+  .projects-heading {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 2.5rem;
+    max-width: 100%;
+    opacity: 1;
+    transform: none;
+  }
+
+  .projects-stack-scroller {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 0 25px;
+  }
+
+  .projects-stack-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .projects-stack {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: max-content;
+    transform-style: flat !important;
+  }
+
+  .stack-slot {
+    position: relative !important;
+    inset: auto !important;
+    flex-shrink: 0;
+    width: 290px;
+    height: 400px;
+    scroll-snap-align: center;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    pointer-events: auto !important;
+  }
+
+  .projects-stack-spacer {
+    display: none !important;
+  }
 }
 
 .projects-stack-stage {
@@ -1311,11 +1418,6 @@ body.scroll-locked {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.projects-stack-spacer {
-  height: 1000px;
-  pointer-events: none;
 }
 
 .projects-stack-progress {
@@ -1330,6 +1432,17 @@ body.scroll-locked {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .projects-stack-progress {
+    position: relative;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 1.5rem 0 0 0;
+    width: 100%;
+  }
 }
 
 .projects-stack-progress span {
@@ -2910,4 +3023,42 @@ html.logo-tilt .connect-logo {
   .egg-toast {
     bottom: 1rem;
   }
+}
+
+/* Passport Stamp Earned Toast Notification */
+.passport-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #d3d3d3;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 999999;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.passport-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-kicker {
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.toast-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }

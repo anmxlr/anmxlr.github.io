@@ -9,6 +9,12 @@
   box-sizing: border-box;
 }
 
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
 *::selection {
   background-color: #d00000 !important;
   color: #000000 !important;
@@ -1034,6 +1040,32 @@ body {
   margin-bottom: 3.5rem;
 }
 
+/* Peeking Cat Animation */
+.peeking-cat-container {
+  position: absolute;
+  top: 0;
+  right: 12%;
+  width: 70px;
+  height: 52px;
+  transform: translateY(-100%);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.peeking-cat {
+  width: 100%;
+  height: auto;
+  display: block;
+  transform: translateY(100%);
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+  filter: grayscale(100%) contrast(1.2);
+}
+
+.footer:hover .peeking-cat {
+  transform: translateY(0);
+}
+
 .postcard-footer {
   display: flex;
   justify-content: space-between;
@@ -1120,32 +1152,92 @@ body {
   padding-left: 2rem;
 }
 
-/* Postage stamp style */
-.postage-stamp {
-  position: relative;
-  width: 76px;
-  height: 92px;
-  background: #ffffff;
-  padding: 8px;
-  border: 1px solid #d3d3d3;
+/* ── Passport Stamps Booklet ── */
+.passport-booklet {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.passport-header {
+  font-family: 'Special Elite', Courier, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  border-bottom: 1.5px dashed rgba(255, 255, 255, 0.12);
+  padding-bottom: 6px;
+}
+
+.passport-stamps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.passport-stamp-slot {
+  position: relative;
+  height: 84px;
+  background: transparent;
+  border: 1.5px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: rotate(4deg);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  padding: 6px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+.passport-stamp-slot .stamp-title {
+  font-family: 'Special Elite', Courier, monospace;
+  font-size: 0.54rem;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.passport-stamp-slot .stamp-status {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+}
+
+/* Unlocked Stamp state */
+.passport-stamp-slot.unlocked {
+  background: #ffffff;
+  border: 1px solid #d3d3d3;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   filter: url(#distressed-stamp);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: rotate(var(--rot, 3deg)) scale(1.02);
 }
 
-.postage-stamp:hover {
-  transform: rotate(0deg) scale(1.06);
+.passport-stamp-slot.unlocked .stamp-title {
+  color: #000000;
+  font-weight: 700;
 }
 
-.stamp-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: invert(0) url(#distressed-stamp);
+.passport-stamp-slot.unlocked .stamp-status {
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 0.5rem;
+}
+
+/* Specific rotation per slot to look like manual stamps */
+.passport-stamp-slot:nth-child(1).unlocked { --rot: -4deg; }
+.passport-stamp-slot:nth-child(2).unlocked { --rot: 2deg; }
+.passport-stamp-slot:nth-child(3).unlocked { --rot: -2deg; }
+
+/* Apply holes to unlocked stamps only */
+.passport-stamp-slot:not(.unlocked) .stamp-holes {
+  display: none;
 }
 
 /* perforation holes for stamp */
@@ -1162,6 +1254,45 @@ body {
   background-size: 11px 11px;
   pointer-events: none;
   z-index: 10;
+}
+
+/* Passport Stamp Earned Toast Notification */
+.passport-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #d3d3d3;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 999999;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+  font-family: 'Special Elite', Courier, monospace;
+}
+
+.passport-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-kicker {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.toast-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .postcard-address {
@@ -1342,10 +1473,10 @@ body {
 
 .vinyl-disk-wrapper {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 290px;
-  height: 290px;
+  left: 5px;
+  top: 25px;
+  width: 240px;
+  height: 240px;
   z-index: 5;
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: auto;
@@ -1566,4 +1697,280 @@ body {
   color: rgba(255, 255, 255, 0.25);
   font-weight: normal;
   pointer-events: none;
+}
+
+/* ── Music Section Collage & Layout Adjustments ── */
+#music-section .hobby-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3.5rem;
+  width: 100%;
+}
+
+.artists-collage {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin-top: 1.5rem;
+  box-sizing: border-box;
+}
+
+.artists-collage .collage-item {
+  position: absolute;
+  width: 92px;
+  height: 92px;
+  transform: rotate(var(--rot, 0deg));
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* Specific overlapping coordinates for the 9 items to look organically scattered */
+.artists-collage .collage-item:nth-child(1) { top: 0px; left: 0px; --rot: -8deg; }
+.artists-collage .collage-item:nth-child(2) { top: 5px; left: 74px; --rot: 4deg; z-index: 3; }
+.artists-collage .collage-item:nth-child(3) { top: -10px; left: 148px; --rot: -3deg; }
+.artists-collage .collage-item:nth-child(4) { top: 72px; left: -10px; --rot: 9deg; z-index: 3; }
+.artists-collage .collage-item:nth-child(5) { top: 68px; left: 76px; --rot: -6deg; z-index: 4; }
+.artists-collage .collage-item:nth-child(6) { top: 78px; left: 154px; --rot: 5deg; z-index: 3; }
+.artists-collage .collage-item:nth-child(7) { top: 148px; left: 5px; --rot: -5deg; }
+.artists-collage .collage-item:nth-child(8) { top: 145px; left: 78px; --rot: 7deg; z-index: 3; }
+.artists-collage .collage-item:nth-child(9) { top: 142px; left: 150px; --rot: -2deg; }
+
+.artists-collage .collage-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(100%) contrast(1.15);
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.artists-collage .collage-item:hover {
+  transform: scale(1.25) rotate(0deg);
+  z-index: 100 !important;
+}
+
+.artists-collage .collage-item:hover img {
+  filter: grayscale(0%) contrast(1);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65);
+}
+
+@media (min-width: 1024px) {
+  #music-section .hobby-content {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5.5rem;
+  }
+  .artists-collage {
+    margin-right: 4rem; /* Shifts the collage leftward closer to the vinyl player */
+  }
+}
+
+/* ── Scrapbook Decor Images ── */
+.decor-image {
+  position: absolute;
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 2; /* Sits behind content cards but above the graph paper background */
+  filter: grayscale(100%) opacity(0.35) contrast(1.1); /* clearly visible outline watermark, like raw typewriter prints on paper */
+  transition: filter 0.4s ease, transform 0.4s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Subtly increase opacity when hovering over sections for a responsive feel */
+section:hover .decor-image {
+  filter: grayscale(100%) opacity(0.65) contrast(1.15);
+}
+
+.decor-image:hover {
+  filter: grayscale(0%) opacity(0.95) contrast(1.15) !important;
+  z-index: 15; /* rise above non-dragged elements */
+}
+
+.decor-image:active {
+  cursor: grabbing;
+}
+
+.decor-coffee {
+  width: 90px;
+  height: auto;
+  top: 40px;
+  right: 8%;
+  transform: rotate(12deg);
+}
+
+.decor-laptop {
+  width: 95px;
+  height: auto;
+  bottom: 20px;
+  left: 2%;
+  transform: rotate(-15deg);
+}
+
+.decor-plane {
+  width: 80px;
+  height: auto;
+  top: 15px;
+  right: 5%;
+  transform: rotate(-25deg);
+}
+
+.decor-cassette {
+  width: 85px;
+  height: auto;
+  top: 20px;
+  right: 15%;
+  transform: rotate(8deg);
+}
+
+.decor-guitar {
+  width: 110px;
+  height: auto;
+  bottom: -30px;
+  left: 2%;
+  transform: rotate(-20deg);
+}
+
+.decor-headphone {
+  width: 75px;
+  height: auto;
+  top: 180px;
+  right: 3%;
+  transform: rotate(18deg);
+}
+
+.decor-greek {
+  width: 100px;
+  height: auto;
+  top: 30px;
+  right: 8%;
+  transform: rotate(-10deg);
+}
+
+.decor-brain {
+  width: 85px;
+  height: auto;
+  bottom: 40px;
+  left: 3%;
+  transform: rotate(15deg);
+}
+
+.decor-waves {
+  width: 120px;
+  height: auto;
+  top: 15px;
+  right: 5%;
+  transform: rotate(5deg);
+}
+
+.decor-tiger {
+  width: 110px;
+  height: auto;
+  bottom: 20px;
+  left: 4%;
+  transform: rotate(-8deg);
+}
+
+.decor-dumbell {
+  width: 90px;
+  height: auto;
+  top: 30px;
+  right: 5%;
+  transform: rotate(-12deg);
+}
+
+.decor-leaf {
+  width: 80px;
+  height: auto;
+  bottom: 30px;
+  left: 2%;
+  transform: rotate(25deg);
+}
+
+.decor-hero-leaf {
+  width: 85px;
+  height: auto;
+  bottom: 50px;
+  left: 6%;
+  transform: rotate(-15deg);
+}
+
+.decor-wolf {
+  width: 110px;
+  height: auto;
+  bottom: 40px;
+  left: 4%;
+  transform: rotate(-12deg);
+}
+
+.decor-guitar2 {
+  width: 90px;
+  height: auto;
+  bottom: -15px;
+  left: 12%;
+  transform: rotate(18deg);
+}
+
+.decor-eins {
+  width: 95px;
+  height: auto;
+  top: 25px;
+  left: 4%;
+  transform: rotate(-5deg);
+}
+
+.decor-currently-laptop {
+  width: 95px;
+  height: auto;
+  top: 20px;
+  right: 5%;
+  transform: rotate(12deg);
+}
+
+.decor-currently-brain {
+  width: 85px;
+  height: auto;
+  bottom: 30px;
+  left: 3%;
+  transform: rotate(-10deg);
+}
+
+.decor-money {
+  width: 100px;
+  height: auto;
+  bottom: 50px;
+  left: 4%;
+  transform: rotate(-15deg);
+}
+
+.decor-reach-plane {
+  width: 80px;
+  height: auto;
+  top: 30px;
+  right: 6%;
+  transform: rotate(20deg);
+}
+
+/* Responsive adjustments to avoid content overlap */
+@media (max-width: 1024px) {
+  .decor-guitar, .decor-guitar2, .decor-laptop, .decor-currently-laptop, .decor-brain, .decor-currently-brain, .decor-tiger, .decor-leaf, .decor-hero-leaf, .decor-wolf, .decor-eins, .decor-money {
+    display: none; /* hide elements on left margins/background to save layout width */
+  }
+}
+
+@media (max-width: 768px) {
+  .decor-image {
+    width: 60px;
+    opacity: 0.2;
+  }
+  section:hover .decor-image {
+    opacity: 0.35;
+  }
 }
