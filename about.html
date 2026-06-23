@@ -329,6 +329,74 @@
             </div>
         </section>
 
+        <!-- ── Minecraft Mini Game Section ────────────────────────────– -->
+        <section class="about-content-section" id="minecraft-section">
+            <div class="section-header">
+                <div class="section-kicker">Mini Game</div>
+                <h2 class="section-title">Pocket Miner</h2>
+                <p class="section-description">
+                    A tiny, lightweight clicker game. Click the block to mine resources, upgrade your tools, and craft the Nether Star!
+                </p>
+            </div>
+            
+            <div class="mc-console-wrapper">
+                <div class="mc-console">
+                    <!-- Screen Area -->
+                    <div class="mc-screen">
+                        <div class="mc-block-container">
+                            <div class="mc-block" id="mc-active-block">
+                                <div class="mc-block-cracks" id="mc-block-cracks"></div>
+                                <span class="mc-block-symbol" id="mc-block-symbol">🪨</span>
+                            </div>
+                        </div>
+                        <div class="mc-screen-stats">
+                            <div class="mc-block-name" id="mc-block-name">Stone</div>
+                            <div class="mc-block-hp-bar">
+                                <div class="mc-block-hp-fill" id="mc-block-hp-fill" style="width: 100%;"></div>
+                            </div>
+                            <div class="mc-block-hp-text" id="mc-block-hp-text">HP: 5 / 5</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Controls Area -->
+                    <div class="mc-controls">
+                        <!-- Inventory Panel -->
+                        <div class="mc-inventory">
+                            <div class="mc-inv-slot" title="Cobblestone">
+                                <span class="mc-inv-icon">🪨</span>
+                                <span class="mc-inv-count" id="mc-count-cobble">0</span>
+                            </div>
+                            <div class="mc-inv-slot" title="Coal">
+                                <span class="mc-inv-icon">⚫</span>
+                                <span class="mc-inv-count" id="mc-count-coal">0</span>
+                            </div>
+                            <div class="mc-inv-slot" title="Iron">
+                                <span class="mc-inv-icon">⚙️</span>
+                                <span class="mc-inv-count" id="mc-count-iron">0</span>
+                            </div>
+                            <div class="mc-inv-slot" title="Gold">
+                                <span class="mc-inv-icon">🪙</span>
+                                <span class="mc-inv-count" id="mc-count-gold">0</span>
+                            </div>
+                            <div class="mc-inv-slot" title="Diamond">
+                                <span class="mc-inv-icon">💎</span>
+                                <span class="mc-inv-count" id="mc-count-diamond">0</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Upgrade Action Panel -->
+                        <div class="mc-actions">
+                            <button class="mc-btn" id="mc-upgrade-btn" type="button">
+                                <span class="mc-btn-label">Upgrade Pickaxe</span>
+                                <span class="mc-btn-cost" id="mc-upgrade-cost">Cost: 10 Cobble</span>
+                            </button>
+                            <div class="mc-tool-info" id="mc-tool-info">Tool: Hand (Power: 1)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ── Currently Doing Section ────────────────────────────– -->
         <section class="about-content-section" id="currently-section">
             <img src="src/assets/images/about/decor/laptop.png" class="decor-image decor-currently-laptop" alt="" draggable="false">

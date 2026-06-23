@@ -115,6 +115,7 @@ body.scroll-locked {
     opacity: 0;
     transform: scale(0) rotate(-15deg);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) rotate(0deg);
@@ -1378,7 +1379,8 @@ body.scroll-locked {
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    padding: 10px 0 25px;
+    padding: 10px calc(50% - 145px) 25px;
+    perspective: 1000px;
   }
 
   .projects-stack-scroller::-webkit-scrollbar {
@@ -1390,7 +1392,8 @@ body.scroll-locked {
     flex-direction: row;
     gap: 20px;
     width: max-content;
-    transform-style: flat !important;
+    position: relative;
+    transform-style: preserve-3d;
   }
 
   .stack-slot {
@@ -1400,10 +1403,10 @@ body.scroll-locked {
     width: 290px;
     height: 400px;
     scroll-snap-align: center;
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-    pointer-events: auto !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    pointer-events: auto;
   }
 
   .projects-stack-spacer {
@@ -1421,17 +1424,14 @@ body.scroll-locked {
 }
 
 .projects-stack-progress {
-  position: sticky;
-  left: 34px;
-  right: 34px;
-  bottom: 20px;
-  z-index: 20;
-  display: block;
+  position: relative;
+  width: min(92vw, 340px);
   height: 3px;
-  margin: -28px 34px 24px;
+  margin-top: 3.5rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   overflow: hidden;
+  z-index: 20;
 }
 
 @media (max-width: 768px) {
@@ -1926,7 +1926,7 @@ project-card {
   margin-top: 4rem;
 }
 
-.signal-readout > div {
+.signal-readout>div {
   display: flex;
   justify-content: space-between;
   align-items: end;
@@ -1969,14 +1969,34 @@ project-card {
   animation: signalPulse 1.8s ease-in-out infinite;
 }
 
-.signal-lines span:nth-child(2) { animation-delay: 0.18s; }
-.signal-lines span:nth-child(3) { animation-delay: 0.34s; }
-.signal-lines span:nth-child(4) { animation-delay: 0.08s; }
-.signal-lines span:nth-child(5) { animation-delay: 0.26s; }
+.signal-lines span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.signal-lines span:nth-child(3) {
+  animation-delay: 0.34s;
+}
+
+.signal-lines span:nth-child(4) {
+  animation-delay: 0.08s;
+}
+
+.signal-lines span:nth-child(5) {
+  animation-delay: 0.26s;
+}
 
 @keyframes signalPulse {
-  0%, 100% { transform: scaleY(0.35); opacity: 0.28; }
-  50% { transform: scaleY(1); opacity: 0.9; }
+
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.28;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 0.9;
+  }
 }
 
 .lab-section {
@@ -2662,6 +2682,7 @@ project-card {
   from {
     transform: scale(1);
   }
+
   to {
     transform: scale(1.08);
   }
@@ -2681,9 +2702,11 @@ project-card {
     opacity: 1;
     transform: translate(0, 0) scale(0) rotate(0deg);
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
     transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot));
@@ -3005,9 +3028,17 @@ html.logo-tilt .connect-logo {
 }
 
 @keyframes logoSpin {
-  0% { transform: rotate(0deg) scale(1); }
-  55% { transform: rotate(300deg) scale(1.35); }
-  100% { transform: rotate(360deg) scale(1); }
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  55% {
+    transform: rotate(300deg) scale(1.35);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
 
 @media (max-width: 768px) {

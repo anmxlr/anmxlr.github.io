@@ -221,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initEasterEggs();
   initPhonePuzzle();
   initReachForm();
-  initAnimatedMe();
 
   // Shared mouse move listener for 3D parallax, mouse-glow orb, and custom cursor
   window.addEventListener('mousemove', (e) => {
@@ -396,12 +395,47 @@ document.addEventListener('DOMContentLoaded', () => {
       if (projectsProgress) {
         projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
       }
-      // Reset 3D transform values for clean layout flow on mobile
-      slots.forEach(slot => {
-        slot.style.transform = '';
-        slot.style.opacity = '';
-        slot.style.filter = '';
-        slot.style.pointerEvents = 'auto';
+      
+      const scrollerWidth = projectsScroller.clientWidth;
+      const scrollerCenter = projectsScroller.scrollLeft + scrollerWidth / 2;
+
+      slots.forEach((slot, index) => {
+        const slotWidth = slot.offsetWidth || 290;
+        // offsetLeft is relative to .projects-stack container
+        const slotCenter = slot.offsetLeft + slotWidth / 2;
+        const diff = slotCenter - scrollerCenter;
+        
+        // Normalize distance: 0 at center, -1 when scrolled left, 1 when entering from right
+        const gap = 20; // grid gap defined in CSS
+        const normalizedDiff = diff / (slotWidth + gap);
+        const absDiff = Math.abs(normalizedDiff);
+
+        // Active state trigger
+        const isActive = absDiff < 0.45;
+        slot.classList.toggle('active', isActive);
+        slot.style.pointerEvents = isActive ? 'auto' : 'none';
+
+        // Scale: grows to 1.05 at center, shrinks to 0.85 when away
+        const scale = 1.05 - Math.min(0.2, absDiff * 0.2);
+        
+        // Opacity: 1.0 at center, fades to 0.45 when away
+        const opacity = 1.0 - Math.min(0.55, absDiff * 0.6);
+
+        // 3D rotation, skew, and translation to create a stack/queue folding effect
+        const rotateY = normalizedDiff * -12; // tilt outwards
+        const skewX = normalizedDiff * -2;   // subtle skew
+        const translateX = normalizedDiff * -30; // pull closer for overlap/queue feel
+
+        slot.style.transform = `translate3d(${translateX}px, 0, 0) scale(${scale}) rotateY(${rotateY}deg) skewX(${skewX}deg)`;
+        slot.style.opacity = opacity;
+        
+        // Blur effect for off-center cards
+        if (absDiff > 0.1) {
+          const blurVal = Math.min(3.5, (absDiff - 0.1) * 4.5);
+          slot.style.filter = `blur(${blurVal}px)`;
+        } else {
+          slot.style.filter = 'none';
+        }
       });
     } else {
       // Desktop 3D stack physics and transformations
@@ -847,64 +881,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function initAnimatedMe() {
-    const animatedMe = document.getElementById('animated-me');
-    if (!animatedMe) return;
-
-    const emojis = ['🚀', '💻', '🎨', '✨', '🔥', '💡', '🎯', '⚡', '🌟', '🎮', '🎵', '📱', '🔮', '🎪', '🎭'];
-    let isAnimating = false;
-
-    animatedMe.addEventListener('mouseenter', () => {
-      if (isAnimating) return;
-      isAnimating = true;
-      animatedMe.classList.add('animating');
-
-      // Explode emojis after a short delay
-      setTimeout(() => {
-        const rect = animatedMe.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        emojis.forEach((emoji, index) => {
-          setTimeout(() => {
-            createEmojiParticle(emoji, centerX, centerY);
-          }, index * 50);
-        });
-
-        // Stop animation after emoji explosion
-        setTimeout(() => {
-          animatedMe.classList.remove('animating');
-          isAnimating = false;
-        }, emojis.length * 50 + 1500);
-      }, 300);
-    });
-  }
-
-  function createEmojiParticle(emoji, startX, startY) {
-    const particle = document.createElement('div');
-    particle.className = 'emoji-particle';
-    particle.textContent = emoji;
-    
-    // Random explosion direction
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 150 + Math.random() * 100;
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-    const rotation = Math.random() * 720 - 360;
-
-    particle.style.left = `${startX}px`;
-    particle.style.top = `${startY}px`;
-    particle.style.setProperty('--tx', `${tx}px`);
-    particle.style.setProperty('--ty', `${ty}px`);
-    particle.style.setProperty('--rot', `${rotation}deg`);
-
-    document.body.appendChild(particle);
-
-    // Remove particle after animation
-    setTimeout(() => {
-      particle.remove();
-    }, 1500);
-  }
 
   function initNameWarp() {
     const canvas = document.getElementById('name-warp-canvas');

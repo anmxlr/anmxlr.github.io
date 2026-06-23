@@ -63,12 +63,29 @@ document.addEventListener('DOMContentLoaded', () => {
         opacity: 0;
         transition: opacity 0.25s ease, width 0.3s cubic-bezier(0.22,1,0.36,1), height 0.3s cubic-bezier(0.22,1,0.36,1);
       }
+      .image-cursor::before {
+        content: '';
+        position: absolute;
+        inset: -30px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease;
+      }
       .image-cursor.visible { opacity: 1; }
       .image-cursor.hovering {
         width: 52px; height: 52px;
       }
+      .image-cursor.hovering::before {
+        transform: scale(1.3);
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+      }
       .image-cursor.clicking {
         width: 32px; height: 32px;
+      }
+      .image-cursor.clicking::before {
+        transform: scale(0.85);
       }
       .image-cursor img {
         width: 100%; height: 100%;
@@ -199,6 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Decor Fly Out from Brain ───────────────────────
   initDecorFlyOut();
+
+  // ── Minecraft Pocket Miner ─────────────────────────
+  initMinecraftGame();
 
   // ── Section Reveal on Scroll ──────────────────────
   const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -743,57 +763,603 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Decor Fly Out from Brain ───────────────────────
   function initDecorFlyOut() {
     const animatedMe = document.getElementById('animated-me');
+    const aboutHero = document.getElementById('about-hero');
     const decorImages = document.querySelectorAll('.decor-image');
-    if (!animatedMe || decorImages.length === 0) return;
+    if (!animatedMe || !aboutHero || decorImages.length === 0) return;
 
     let hasSpread = false;
+    let fadeOutTimer = null;
+    const isMobile = window.innerWidth <= 768;
 
-    // Calculate and set initial state (condensed inside the brain)
+    // Move all decor images to the hero section so they are visible immediately,
+    // share the same stacking context, and do not inherit fade/scroll effects from lower sections.
+    decorImages.forEach(el => {
+      if (el.parentNode !== aboutHero) {
+        aboutHero.appendChild(el);
+      }
+    });
+
+    // Calculate and set initial state (condensed inside the head/brain of animated-me)
     function setupInitialState() {
       if (hasSpread) return;
 
       const meRect = animatedMe.getBoundingClientRect();
-      const brainX = meRect.left + meRect.width / 2;
-      const brainY = meRect.top + meRect.height * 0.3; // head/brain area
+      const heroRect = aboutHero.getBoundingClientRect();
+      const brainX = (meRect.left - heroRect.left) + meRect.width / 2;
+      const brainY = (meRect.top - heroRect.top) + meRect.height * 0.35;
 
       decorImages.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        const elCenterX = rect.left + rect.width / 2;
-        const elCenterY = rect.top + rect.height / 2;
+        const elWidth = el.offsetWidth || 80;
+        const elHeight = el.offsetHeight || 80;
 
-        const deltaX = brainX - elCenterX;
-        const deltaY = brainY - elCenterY;
-
+        // Position directly at the center of the brain
         el.style.transition = 'none';
-        el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0)`;
+        el.style.left = `${brainX - elWidth / 2}px`;
+        el.style.top = `${brainY - elHeight / 2}px`;
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+        el.style.transform = 'scale(0)';
         el.style.opacity = '0';
         el.style.pointerEvents = 'none';
       });
     }
 
-    // Wait for everything to load and layout to stabilize before calculating coordinates
+    // Wait for layout to stabilize
     window.addEventListener('load', setupInitialState);
-    // Also run immediately just in case load already fired
     setTimeout(setupInitialState, 200);
 
-    // Hover listener to trigger the spread
-    animatedMe.addEventListener('mouseenter', () => {
-      if (hasSpread) return;
+    function scatterDecor() {
       hasSpread = true;
+      clearTimeout(fadeOutTimer);
 
-      // Staggered fly out
+      const meRect = animatedMe.getBoundingClientRect();
+      const heroRect = aboutHero.getBoundingClientRect();
+      const brainX = (meRect.left - heroRect.left) + meRect.width / 2;
+      const brainY = (meRect.top - heroRect.top) + meRect.height * 0.35;
+
+      const xRangeMin = isMobile ? 55 : 140;
+      const xRangeMax = isMobile ? 120 : 380;
+      const yRangeMax = isMobile ? 100 : 250;
+
+      // Staggered scatter fly out
       decorImages.forEach((el, index) => {
+        const elWidth = el.offsetWidth || 80;
+        const elHeight = el.offsetHeight || 80;
+
+        // Reset directly to the brain center instantly
+        el.style.transition = 'none';
+        el.style.left = `${brainX - elWidth / 2}px`;
+        el.style.top = `${brainY - elHeight / 2}px`;
+        el.style.transform = 'scale(0)';
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+
+        // Alternate left and right sides of the profile
+        const side = index % 2 === 0 ? -1 : 1;
+        const targetX = brainX + side * (xRangeMin + Math.random() * (xRangeMax - xRangeMin)) - elWidth / 2;
+        const targetY = brainY + (Math.random() - 0.5) * 2 * yRangeMax - elHeight / 2;
+        const randomRot = Math.random() * 40 - 20; // -20deg to 20deg
+
         setTimeout(() => {
-          el.style.transition = 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.6s ease, filter 0.4s ease';
-          el.style.transform = '';
-          el.style.opacity = '';
+          el.style.transition = 'left 1.4s cubic-bezier(0.16, 1, 0.3, 1), top 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s ease';
+          el.style.left = `${targetX}px`;
+          el.style.top = `${targetY}px`;
+          el.style.transform = `scale(1) rotate(${randomRot}deg)`;
+          el.style.opacity = '1';
           
-          // Enable mouse events/drag-and-drop after animation completes
+          // Disable transitions after animation to prevent lag during dragging
           setTimeout(() => {
+            el.style.transition = 'filter 0.4s ease, opacity 2.5s ease, transform 2.5s ease';
             el.style.pointerEvents = 'auto';
-          }, 1600);
-        }, index * 60);
+          }, 1400);
+        }, 50 + index * 60);
       });
+
+      // Slowly disappear/fade out after a display duration
+      fadeOutTimer = setTimeout(() => {
+        decorImages.forEach(el => {
+          el.style.transition = 'opacity 3.0s ease, transform 3.0s ease, filter 0.4s ease';
+          el.style.opacity = '0';
+          // Retain rotation while shrinking
+          const currentRotation = el.style.transform.match(/rotate\([^)]+\)/);
+          const rotStr = currentRotation ? currentRotation[0] : 'rotate(0deg)';
+          el.style.transform = `${rotStr} scale(0.6)`;
+          el.style.pointerEvents = 'none';
+        });
+        hasSpread = false;
+      }, 1400 + decorImages.length * 60 + 3500);
+    }
+
+    // Hover listener to trigger the scatter spread
+    animatedMe.addEventListener('mouseenter', () => {
+      if (!hasSpread) {
+        scatterDecor();
+      }
     });
+
+    // Click listener to force a re-scatter (condenses back and spreads out again)
+    animatedMe.addEventListener('click', () => {
+      scatterDecor();
+    });
+  }
+
+  function initMinecraftGame() {
+    const blockEl = document.getElementById('mc-active-block');
+    const cracksEl = document.getElementById('mc-block-cracks');
+    const symbolEl = document.getElementById('mc-block-symbol');
+    const nameEl = document.getElementById('mc-block-name');
+    const hpFillEl = document.getElementById('mc-block-hp-fill');
+    const hpTextEl = document.getElementById('mc-block-hp-text');
+    const upgradeBtn = document.getElementById('mc-upgrade-btn');
+    const upgradeCostEl = document.getElementById('mc-upgrade-cost');
+    const toolInfoEl = document.getElementById('mc-tool-info');
+    
+    if (!blockEl) return;
+    
+    // Tools progression: 0 = Hand, 1 = Wood Pickaxe, 2 = Iron Pickaxe, 3 = Diamond Pickaxe, 4 = Nether Pickaxe, 5 = Nether Star
+    const tools = [
+      { name: 'Hand', power: 1 },
+      { name: 'Wood Pickaxe', power: 2 },
+      { name: 'Iron Pickaxe', power: 4 },
+      { name: 'Diamond Pickaxe', power: 8 },
+      { name: 'Nether Pickaxe', power: 16 },
+      { name: 'Nether Star', power: 50 }
+    ];
+    
+    const upgradeCosts = [
+      { cobble: 15 },
+      { cobble: 30, coal: 8 },
+      { cobble: 50, coal: 15, iron: 8 },
+      { cobble: 80, coal: 25, iron: 15, gold: 8 },
+      { cobble: 100, coal: 40, iron: 25, gold: 15, diamond: 5 }
+    ];
+    
+    const blockPools = [
+      // Tier 0
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 80, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } } ],
+      // Tier 1
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 55, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 30, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 15, drops: { cobble: 1, iron: 1 } } ],
+      // Tier 2
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 40, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 25, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 10, drops: { cobble: 1, gold: 1 } } ],
+      // Tier 3
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 30, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 20, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 5, drops: { cobble: 1, diamond: 1 } } ],
+      // Tier 4
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 20, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 15, drops: { cobble: 1, diamond: 1 } } ],
+      // Tier 5
+      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 10, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 15, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 30, drops: { cobble: 1, diamond: 1 } } ]
+    ];
+    
+    const state = {
+      inventory: { cobble: 0, coal: 0, iron: 0, gold: 0, diamond: 0 },
+      tier: 0
+    };
+    
+    let activeBlock = null;
+    let currentHP = 0;
+    
+    // Load state
+    const saved = localStorage.getItem('mc_pocket_miner_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.inventory && typeof parsed.tier === 'number') {
+          state.inventory = parsed.inventory;
+          state.tier = parsed.tier;
+        }
+      } catch (e) {
+        console.warn('Failed to parse pocket miner state:', e);
+      }
+    }
+    
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+    
+    function playNoiseBurst(duration, volume) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const bufferSize = ctx.sampleRate * duration;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1000;
+        filter.Q.value = 1.0;
+        
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        
+        noise.start(now);
+        noise.stop(now + duration);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    function playHitSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.08);
+        
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.08);
+        
+        playNoiseBurst(0.04, 0.15);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    function playBreakSound() {
+      try {
+        playHitSound();
+        setTimeout(() => playHitSound(), 50);
+        setTimeout(() => {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(80, now);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+          
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 300;
+          
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(now);
+          osc.stop(now + 0.15);
+        }, 100);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    function playUpgradeSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          
+          gain.gain.setValueAtTime(0, now + idx * 0.08);
+          gain.gain.linearRampToValueAtTime(0.15, now + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.18);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.2);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    function playNetherStarSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00];
+        
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          
+          osc.type = (idx === notes.length - 1) ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          
+          gain.gain.setValueAtTime(0, now + idx * 0.06);
+          gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.06 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.25);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.3);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    // Core game functions
+    function selectRandomBlock() {
+      const pool = blockPools[Math.min(state.tier, 5)];
+      const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+      let rand = Math.random() * totalWeight;
+      for (const block of pool) {
+        if (rand < block.weight) {
+          return block;
+        }
+        rand -= block.weight;
+      }
+      return pool[0];
+    }
+    
+    function spawnNewBlock() {
+      activeBlock = selectRandomBlock();
+      currentHP = activeBlock.hp;
+      
+      // Update UI
+      symbolEl.textContent = activeBlock.symbol;
+      nameEl.textContent = activeBlock.name;
+      cracksEl.className = 'mc-block-cracks'; // Reset cracks
+      
+      updateHPBar();
+    }
+    
+    function updateHPBar() {
+      const pct = Math.max(0, (currentHP / activeBlock.hp) * 100);
+      hpFillEl.style.width = `${pct}%`;
+      hpTextEl.textContent = `HP: ${Math.max(0, currentHP)} / ${activeBlock.hp}`;
+      
+      // Update cracks class based on remaining HP percentage
+      const ratio = currentHP / activeBlock.hp;
+      cracksEl.className = 'mc-block-cracks';
+      if (ratio <= 0.15) {
+        cracksEl.classList.add('crack-heavy');
+      } else if (ratio <= 0.45) {
+        cracksEl.classList.add('crack-medium');
+      } else if (ratio <= 0.75) {
+        cracksEl.classList.add('crack-light');
+      }
+    }
+    
+    function canAffordUpgrade() {
+      if (state.tier >= 5) return false;
+      const cost = upgradeCosts[state.tier];
+      for (const res in cost) {
+        if ((state.inventory[res] || 0) < cost[res]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    function deductUpgradeCost() {
+      if (state.tier >= 5) return;
+      const cost = upgradeCosts[state.tier];
+      for (const res in cost) {
+        state.inventory[res] -= cost[res];
+      }
+    }
+    
+    function getUpgradeCostString() {
+      if (state.tier >= 5) return 'MAX TIER';
+      const cost = upgradeCosts[state.tier];
+      const parts = [];
+      if (cost.cobble) parts.push(`${cost.cobble} Cobble`);
+      if (cost.coal) parts.push(`${cost.coal} Coal`);
+      if (cost.iron) parts.push(`${cost.iron} Iron`);
+      if (cost.gold) parts.push(`${cost.gold} Gold`);
+      if (cost.diamond) parts.push(`${cost.diamond} Diamond`);
+      return 'Cost: ' + parts.join(', ');
+    }
+    
+    function getUpgradeLabel() {
+      if (state.tier >= 5) return 'Legendary Miner!';
+      if (state.tier === 4) return 'Craft Nether Star';
+      return `Upgrade to ${tools[state.tier + 1].name}`;
+    }
+    
+    function saveState() {
+      localStorage.setItem('mc_pocket_miner_state', JSON.stringify(state));
+    }
+    
+    function updateUI() {
+      document.getElementById('mc-count-cobble').textContent = state.inventory.cobble;
+      document.getElementById('mc-count-coal').textContent = state.inventory.coal;
+      document.getElementById('mc-count-iron').textContent = state.inventory.iron;
+      document.getElementById('mc-count-gold').textContent = state.inventory.gold;
+      document.getElementById('mc-count-diamond').textContent = state.inventory.diamond;
+      
+      const currentTool = tools[state.tier];
+      toolInfoEl.textContent = `Tool: ${currentTool.name} (Power: ${currentTool.power})`;
+      
+      if (state.tier >= 5) {
+        upgradeBtn.disabled = true;
+        upgradeBtn.classList.remove('afford');
+        upgradeBtn.querySelector('.mc-btn-label').textContent = getUpgradeLabel();
+        upgradeCostEl.textContent = '';
+      } else {
+        upgradeBtn.querySelector('.mc-btn-label').textContent = getUpgradeLabel();
+        upgradeCostEl.textContent = getUpgradeCostString();
+        
+        if (canAffordUpgrade()) {
+          upgradeBtn.disabled = false;
+          upgradeBtn.classList.add('afford');
+        } else {
+          upgradeBtn.disabled = true;
+          upgradeBtn.classList.remove('afford');
+        }
+      }
+    }
+    
+    function spawnParticles(color) {
+      const screenEl = document.querySelector('.mc-screen');
+      if (!screenEl) return;
+      
+      const count = 5 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'mc-particle';
+        
+        const dx = (Math.random() - 0.5) * 80 + 'px';
+        const dy = (Math.random() - 0.5) * 60 - 20 + 'px';
+        const rot = (Math.random() * 360) + 'deg';
+        
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+        p.style.setProperty('--rot', rot);
+        p.style.setProperty('--color', color);
+        
+        p.style.left = '52px';
+        p.style.top = '52px';
+        
+        screenEl.appendChild(p);
+        
+        setTimeout(() => p.remove(), 600);
+      }
+    }
+    
+    function spawnFloatingText(text) {
+      const screenEl = document.querySelector('.mc-screen');
+      if (!screenEl) return;
+      
+      const ft = document.createElement('div');
+      ft.className = 'mc-floating-text';
+      ft.textContent = text;
+      
+      ft.style.left = '40px';
+      ft.style.top = '30px';
+      
+      screenEl.appendChild(ft);
+      setTimeout(() => ft.remove(), 800);
+    }
+    
+    blockEl.addEventListener('click', () => {
+      blockEl.classList.remove('shake');
+      void blockEl.offsetWidth;
+      blockEl.classList.add('shake');
+      setTimeout(() => blockEl.classList.remove('shake'), 150);
+      
+      const currentTool = tools[state.tier];
+      currentHP -= currentTool.power;
+      
+      let particleColor = '#a4e07a';
+      if (activeBlock.name === 'Stone') particleColor = '#888888';
+      else if (activeBlock.name === 'Coal Ore') particleColor = '#3a3a3a';
+      else if (activeBlock.name === 'Iron Ore') particleColor = '#cc9966';
+      else if (activeBlock.name === 'Gold Ore') particleColor = '#ffcc00';
+      else if (activeBlock.name === 'Diamond Ore') particleColor = '#5de2e7';
+      
+      spawnParticles(particleColor);
+      
+      if (currentHP <= 0) {
+        playBreakSound();
+        
+        let rewardTexts = [];
+        for (const res in activeBlock.drops) {
+          const qty = activeBlock.drops[res];
+          state.inventory[res] = (state.inventory[res] || 0) + qty;
+          
+          let label = res;
+          if (res === 'cobble') label = 'Cobble';
+          else if (res === 'coal') label = 'Coal';
+          else if (res === 'iron') label = 'Iron';
+          else if (res === 'gold') label = 'Gold';
+          else if (res === 'diamond') label = 'Diamond';
+          
+          rewardTexts.push(`+${qty} ${label}`);
+        }
+        
+        spawnFloatingText(rewardTexts.join(' '));
+        saveState();
+        updateUI();
+        spawnNewBlock();
+      } else {
+        playHitSound();
+        updateHPBar();
+      }
+    });
+    
+    upgradeBtn.addEventListener('click', () => {
+      if (!canAffordUpgrade()) return;
+      
+      deductUpgradeCost();
+      state.tier++;
+      
+      if (state.tier === 5) {
+        playNetherStarSound();
+        if (window.unlockPassportStamp) {
+          window.unlockPassportStamp('hacker');
+        }
+        spawnParticles('#ffd700');
+        spawnParticles('#5de2e7');
+      } else {
+        playUpgradeSound();
+      }
+      
+      saveState();
+      updateUI();
+      spawnNewBlock();
+    });
+    
+    updateUI();
+    spawnNewBlock();
   }
 });
