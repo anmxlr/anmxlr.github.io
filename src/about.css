@@ -2053,7 +2053,6 @@ section:hover .decor-image {
 .mc-block {
   width: 76px;
   height: 76px;
-  border: 1.5px dashed rgba(164, 224, 122, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2061,13 +2060,11 @@ section:hover .decor-image {
   cursor: pointer;
   position: relative;
   user-select: none;
-  background: rgba(164, 224, 122, 0.02);
-  transition: transform 0.05s ease, background-color 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.05s ease, filter 0.2s ease;
 }
 
 .mc-block:hover {
-  background-color: rgba(164, 224, 122, 0.08);
-  border-color: rgba(164, 224, 122, 0.8);
+  filter: brightness(1.12);
 }
 
 .mc-block:active {
@@ -2101,6 +2098,8 @@ section:hover .decor-image {
 
 .mc-block-symbol {
   display: block;
+  width: 100%;
+  height: 100%;
   z-index: 1;
   transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
@@ -2188,6 +2187,17 @@ section:hover .decor-image {
 
 .mc-inv-icon {
   font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-inv-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
 }
 
 .mc-inv-count {
@@ -2332,4 +2342,120 @@ section:hover .decor-image {
     max-width: 100%;
     padding: 0 10px;
   }
+}
+
+/* ── Minecraft HUD & Game Over Screen ──────────────── */
+#mc-health-bar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10005;
+  display: flex;
+  gap: 4px;
+}
+
+.mc-heart-invincible {
+  animation: mc-heart-flash 0.15s infinite;
+}
+
+@keyframes mc-heart-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+#mc-hit-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(180, 0, 0, 0.45);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10008;
+  transition: opacity 0.08s ease;
+}
+
+#mc-gameover-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 0, 0, 0.85);
+  z-index: 10010;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  text-align: center;
+  padding: 20px;
+}
+
+#mc-gameover-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mc-go-title {
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  color: #ff2222;
+  text-shadow: 4px 4px 0px #300000;
+  font-family: 'Special Elite', Courier, monospace;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+  animation: mc-go-pulse 1.5s infinite alternate;
+}
+
+@keyframes mc-go-pulse {
+  0% { transform: scale(0.98); text-shadow: 3px 3px 0px #200000; }
+  100% { transform: scale(1.02); text-shadow: 5px 5px 0px #400000; }
+}
+
+.mc-go-sub {
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 35px;
+  font-family: 'Courier Prime', Courier, monospace;
+}
+
+.mc-go-btn {
+  padding: 12px 28px;
+  background: #5a5a5a;
+  border: 3px solid #000000;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Courier Prime', Courier, monospace;
+  text-transform: uppercase;
+  box-shadow: inset -3px -3px 0px #2e2e2e, inset 3px 3px 0px #8e8e8e;
+  border-radius: 0;
+  transition: background 0.15s, transform 0.05s;
+}
+
+.mc-go-btn:hover {
+  background: #707070;
+  border-color: #ffffff;
+}
+
+.mc-go-btn:active {
+  transform: scale(0.98);
+}
+
+.mc-mob {
+  position: fixed;
+  z-index: 10002;
+  pointer-events: none;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  display: block;
+}
+
+#mc-block-symbol img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  pointer-events: none;
+  display: block;
 }

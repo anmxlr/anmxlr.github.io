@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create cursor element
     cursorEl = document.createElement('div');
     cursorEl.className = 'image-cursor';
-    cursorEl.innerHTML = '<img src="src/assets/images/about/cursor.PNG" alt="" draggable="false">';
+    cursorEl.innerHTML = '<img src="src/assets/images/about/cursor.png" alt="" draggable="false">';
     document.body.appendChild(cursorEl);
 
     // Hide default cursor
@@ -54,12 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
       *, *::before, *::after { cursor: none !important; }
       .image-cursor {
         position: fixed;
-        top: 0; left: 0;
+        left: 0; top: 0;
         width: 40px; height: 40px;
         pointer-events: none;
         z-index: 99999;
-        transform: translate(-50%, -50%);
-        will-change: transform;
+        transform: translate(var(--cursor-offset-x, -20px), var(--cursor-offset-y, -20px));
+        will-change: transform, left, top;
         opacity: 0;
         transition: opacity 0.25s ease, width 0.3s cubic-bezier(0.22,1,0.36,1), height 0.3s cubic-bezier(0.22,1,0.36,1);
       }
@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
       .image-cursor.clicking img {
         transform: scale(0.85);
       }
+      .image-cursor.swinging img {
+        transform: rotate(-35deg) scale(1.15) !important;
+        transition: transform 0.05s ease-out !important;
+      }
     `;
     document.head.appendChild(cursorStyle);
 
@@ -127,15 +131,74 @@ document.addEventListener('DOMContentLoaded', () => {
       cursorVisible = false;
     });
 
+    window.updateGlobalCursor = function (tier) {
+      if (!cursorEl) return;
+      const img = cursorEl.querySelector('img');
+      if (img) {
+        const paths = [
+          'src/assets/images/about/cursor.png',
+          'src/assets/images/minecraft/Wooden_Pickaxe_JE3_BE3.webp',
+          'src/assets/images/minecraft/Iron_Pickaxe_JE3_BE2.webp',
+          'src/assets/images/minecraft/Golden_Pickaxe_JE4_BE3.webp',
+          'src/assets/images/minecraft/Diamond_Pickaxe_JE3_BE3.webp',
+          'src/assets/images/minecraft/Enchanted_Netherite_Pickaxe.webp'
+        ];
+        const newSrc = paths[tier] || paths[0];
+        if (img.getAttribute('src') !== newSrc) {
+          img.src = newSrc;
+          img.onerror = () => {
+            img.src = 'src/assets/images/about/cursor.png';
+          };
+        }
+        
+        if (tier === 0) {
+          cursorEl.style.setProperty('--cursor-offset-x', '-20px');
+          cursorEl.style.setProperty('--cursor-offset-y', '-20px');
+        } else {
+          cursorEl.style.setProperty('--cursor-offset-x', '0px');
+          cursorEl.style.setProperty('--cursor-offset-y', '-32px');
+        }
+      }
+    };
+
+    // Load tier from localStorage for cursor initialization
+    let initialTier = 0;
+    const savedStateForCursor = localStorage.getItem('mc_pocket_miner_state');
+    if (savedStateForCursor) {
+      try {
+        const parsed = JSON.parse(savedStateForCursor);
+        if (typeof parsed.tier === 'number') {
+          initialTier = parsed.tier;
+        }
+      } catch (e) {}
+    }
+    window.currentMinecraftTier = initialTier;
+    window.updateGlobalCursor(initialTier);
+
     // Hover on interactive elements
     window.addEventListener('mouseover', (e) => {
-      const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link, .decor-image');
-      cursorEl.classList.toggle('hovering', !!hit);
+      const isBlock = e.target.closest('#mc-active-block');
+      if (isBlock) {
+        cursorEl.classList.add('mc-custom-cursor');
+        cursorEl.classList.remove('hovering');
+      } else {
+        cursorEl.classList.remove('mc-custom-cursor');
+        const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link, .decor-image');
+        cursorEl.classList.toggle('hovering', !!hit);
+      }
     });
 
     // Click states
-    window.addEventListener('mousedown', () => cursorEl.classList.add('clicking'));
-    window.addEventListener('mouseup', () => cursorEl.classList.remove('clicking'));
+    window.addEventListener('mousedown', () => {
+      cursorEl.classList.add('clicking');
+      if (cursorEl.classList.contains('mc-custom-cursor')) {
+        cursorEl.classList.add('swinging');
+      }
+    });
+    window.addEventListener('mouseup', () => {
+      cursorEl.classList.remove('clicking');
+      cursorEl.classList.remove('swinging');
+    });
 
     // Smooth follow loop
     function animateCursor() {
@@ -896,14 +959,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!blockEl) return;
     
-    // Tools progression: 0 = Hand, 1 = Wood Pickaxe, 2 = Iron Pickaxe, 3 = Diamond Pickaxe, 4 = Nether Pickaxe, 5 = Nether Star
+    // Tools progression: 0 = Hand, 1 = Wooden Pickaxe, 2 = Iron Pickaxe, 3 = Golden Pickaxe, 4 = Diamond Pickaxe, 5 = Netherite Pickaxe
     const tools = [
       { name: 'Hand', power: 1 },
-      { name: 'Wood Pickaxe', power: 2 },
+      { name: 'Wooden Pickaxe', power: 2 },
       { name: 'Iron Pickaxe', power: 4 },
-      { name: 'Diamond Pickaxe', power: 8 },
-      { name: 'Nether Pickaxe', power: 16 },
-      { name: 'Nether Star', power: 50 }
+      { name: 'Golden Pickaxe', power: 8 },
+      { name: 'Diamond Pickaxe', power: 16 },
+      { name: 'Netherite Pickaxe', power: 50 }
     ];
     
     const upgradeCosts = [
@@ -916,35 +979,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const blockPools = [
       // Tier 0
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 80, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } } ],
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 80, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } } ],
       // Tier 1
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 55, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 30, drops: { cobble: 1, coal: 1 } },
-        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 15, drops: { cobble: 1, iron: 1 } } ],
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 55, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 30, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: 'src/assets/images/minecraft/iron.png', hp: 20, weight: 15, drops: { cobble: 1, iron: 1 } } ],
       // Tier 2
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 40, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 25, drops: { cobble: 1, coal: 1 } },
-        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
-        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 10, drops: { cobble: 1, gold: 1 } } ],
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 40, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 25, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: 'src/assets/images/minecraft/iron.png', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: 'src/assets/images/minecraft/gold.jpg', hp: 40, weight: 10, drops: { cobble: 1, gold: 1 } } ],
       // Tier 3
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 30, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
-        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
-        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 20, drops: { cobble: 1, gold: 1 } },
-        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 5, drops: { cobble: 1, diamond: 1 } } ],
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 30, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: 'src/assets/images/minecraft/iron.png', hp: 20, weight: 25, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: 'src/assets/images/minecraft/gold.jpg', hp: 40, weight: 20, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: 'src/assets/images/minecraft/diamond.jpg', hp: 80, weight: 5, drops: { cobble: 1, diamond: 1 } } ],
       // Tier 4
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 20, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
-        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
-        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
-        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 15, drops: { cobble: 1, diamond: 1 } } ],
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 20, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 20, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: 'src/assets/images/minecraft/iron.png', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: 'src/assets/images/minecraft/gold.jpg', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: 'src/assets/images/minecraft/diamond.jpg', hp: 80, weight: 15, drops: { cobble: 1, diamond: 1 } } ],
       // Tier 5
-      [ { name: 'Stone', symbol: '🪨', hp: 5, weight: 10, drops: { cobble: 1 } },
-        { name: 'Coal Ore', symbol: '⚫', hp: 10, weight: 15, drops: { cobble: 1, coal: 1 } },
-        { name: 'Iron Ore', symbol: '⚙️', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
-        { name: 'Gold Ore', symbol: '🪙', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
-        { name: 'Diamond Ore', symbol: '💎', hp: 80, weight: 30, drops: { cobble: 1, diamond: 1 } } ]
+      [ { name: 'Stone', symbol: 'src/assets/images/minecraft/stone.jpg', hp: 5, weight: 10, drops: { cobble: 1 } },
+        { name: 'Coal Ore', symbol: 'src/assets/images/minecraft/coal.jpg', hp: 10, weight: 15, drops: { cobble: 1, coal: 1 } },
+        { name: 'Iron Ore', symbol: 'src/assets/images/minecraft/iron.png', hp: 20, weight: 20, drops: { cobble: 1, iron: 1 } },
+        { name: 'Gold Ore', symbol: 'src/assets/images/minecraft/gold.jpg', hp: 40, weight: 25, drops: { cobble: 1, gold: 1 } },
+        { name: 'Diamond Ore', symbol: 'src/assets/images/minecraft/diamond.jpg', hp: 80, weight: 30, drops: { cobble: 1, diamond: 1 } } ]
     ];
     
     const state = {
@@ -954,6 +1017,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let activeBlock = null;
     let currentHP = 0;
+    
+    // Page level health parameters
+    let health = 10;
+    let isGameOver = false;
+    let isInvincible = false;
+    
+    // Combo & Gold Rush parameters (mobile & tap-focused reward game)
+    let comboCount = 0;
+    let lastTapTime = 0;
+    let isGoldRush = false;
+    let goldRushTimeout = null;
     
     // Load state
     const saved = localStorage.getItem('mc_pocket_miner_state');
@@ -967,6 +1041,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {
         console.warn('Failed to parse pocket miner state:', e);
       }
+    }
+    window.currentMinecraftTier = state.tier;
+    if (typeof window.updateGlobalCursor === 'function') {
+      window.updateGlobalCursor(state.tier);
     }
     
     // Web Audio Synthesizer
@@ -1107,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    function playNetherStarSound() {
+    function playNetheriteUpgradeSound() {
       try {
         const ctx = getAudioContext();
         if (!ctx) return;
@@ -1136,6 +1214,112 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
+    function playHurtSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.linearRampToValueAtTime(70, now + 0.15);
+        
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 400;
+        
+        gainNode.gain.setValueAtTime(0.4, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        
+        osc.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function playTeleportSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+        
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    
+    function spawnPurpleParticles(x, y) {
+      const body = document.body;
+      const count = 12;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'mc-particle';
+        p.style.position = 'fixed';
+        p.style.zIndex = '10009';
+        p.style.width = '6px';
+        p.style.height = '6px';
+        p.style.backgroundColor = '#cc00ff';
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        
+        const dx = (Math.random() - 0.5) * 100 + 'px';
+        const dy = (Math.random() - 0.5) * 100 + 'px';
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+        p.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+        p.style.setProperty('--color', '#cc00ff');
+        
+        body.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+      }
+    }
+    
+    function drawHearts(currentHealth) {
+      const healthBar = document.getElementById('mc-health-bar');
+      if (!healthBar) return;
+      healthBar.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        const heartImg = document.createElement('img');
+        heartImg.style.width = '24px';
+        heartImg.style.height = '24px';
+        heartImg.style.imageRendering = 'pixelated';
+        
+        // Each heart represents 2 HP
+        const heartVal = currentHealth - (i * 2);
+        if (heartVal >= 2) {
+          heartImg.src = 'src/assets/images/minecraft/full.png';
+        } else if (heartVal === 1) {
+          heartImg.src = 'src/assets/images/minecraft/half.png';
+        } else {
+          heartImg.src = 'src/assets/images/minecraft/empty.png';
+        }
+        healthBar.appendChild(heartImg);
+      }
+    }
+    
     // Core game functions
     function selectRandomBlock() {
       const pool = blockPools[Math.min(state.tier, 5)];
@@ -1155,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentHP = activeBlock.hp;
       
       // Update UI
-      symbolEl.textContent = activeBlock.symbol;
+      symbolEl.innerHTML = `<img src="${activeBlock.symbol}" alt="${activeBlock.name}" />`;
       nameEl.textContent = activeBlock.name;
       cracksEl.className = 'mc-block-cracks'; // Reset cracks
       
@@ -1212,7 +1396,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function getUpgradeLabel() {
       if (state.tier >= 5) return 'Legendary Miner!';
-      if (state.tier === 4) return 'Craft Nether Star';
       return `Upgrade to ${tools[state.tier + 1].name}`;
     }
     
@@ -1246,6 +1429,11 @@ document.addEventListener('DOMContentLoaded', () => {
           upgradeBtn.disabled = true;
           upgradeBtn.classList.remove('afford');
         }
+      }
+      
+      window.currentMinecraftTier = state.tier;
+      if (typeof window.updateGlobalCursor === 'function') {
+        window.updateGlobalCursor(state.tier);
       }
     }
     
@@ -1291,30 +1479,112 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => ft.remove(), 800);
     }
     
+    // Create combo badge inside the screen
+    const screenEl = document.querySelector('.mc-screen');
+    if (screenEl && !document.getElementById('mc-combo-badge')) {
+      const badge = document.createElement('div');
+      badge.id = 'mc-combo-badge';
+      badge.className = 'mc-combo-badge';
+      badge.style.position = 'absolute';
+      badge.style.top = '8px';
+      badge.style.right = '8px';
+      badge.style.fontSize = '0.75rem';
+      badge.style.fontWeight = '700';
+      badge.style.color = '#ffd700';
+      badge.style.background = 'rgba(0,0,0,0.7)';
+      badge.style.padding = '2px 6px';
+      badge.style.border = '1px solid #ffd700';
+      badge.style.zIndex = '5';
+      badge.style.fontFamily = "'Courier Prime', Courier, monospace";
+      badge.style.display = 'none';
+      badge.style.transition = 'transform 0.05s ease';
+      screenEl.appendChild(badge);
+    }
+
     blockEl.addEventListener('click', () => {
       blockEl.classList.remove('shake');
       void blockEl.offsetWidth;
       blockEl.classList.add('shake');
       setTimeout(() => blockEl.classList.remove('shake'), 150);
       
+      // Handle tap combo
+      const now = Date.now();
+      if (now - lastTapTime < 800) {
+        comboCount++;
+      } else {
+        comboCount = 1;
+      }
+      lastTapTime = now;
+      
+      const comboBadge = document.getElementById('mc-combo-badge');
+      if (comboBadge) {
+        if (comboCount >= 3) {
+          comboBadge.style.display = 'block';
+          comboBadge.textContent = isGoldRush ? `RUSH 3X!` : `Combo x${comboCount}`;
+          comboBadge.style.transform = 'scale(1.2)';
+          setTimeout(() => { comboBadge.style.transform = 'scale(1.0)'; }, 80);
+        } else {
+          comboBadge.style.display = 'none';
+        }
+      }
+      
+      // Trigger Gold Rush
+      if (comboCount >= 10 && !isGoldRush) {
+        isGoldRush = true;
+        playUpgradeSound(); // play chime sound
+        spawnFloatingText("★ GOLD RUSH ★");
+        if (comboBadge) {
+          comboBadge.textContent = `RUSH 3X!`;
+          comboBadge.style.borderColor = '#ff2222';
+          comboBadge.style.color = '#ff2222';
+          comboBadge.style.animation = 'mc-heart-flash 0.15s infinite';
+        }
+        
+        // Temporarily swap active block to gold
+        symbolEl.innerHTML = `<img src="src/assets/images/minecraft/gold.jpg" alt="Golden Block" />`;
+        nameEl.textContent = "Golden Block";
+        
+        goldRushTimeout = setTimeout(() => {
+          isGoldRush = false;
+          if (comboBadge) {
+            comboBadge.style.display = 'none';
+            comboBadge.style.borderColor = '#ffd700';
+            comboBadge.style.color = '#ffd700';
+            comboBadge.style.animation = 'none';
+          }
+          comboCount = 0;
+          // Restore normal block
+          symbolEl.innerHTML = `<img src="${activeBlock.symbol}" alt="${activeBlock.name}" />`;
+          nameEl.textContent = activeBlock.name;
+          spawnFloatingText("Rush ended");
+        }, 6000);
+      }
+      
       const currentTool = tools[state.tier];
-      currentHP -= currentTool.power;
+      // Power is boosted during gold rush
+      const damageMultiplier = isGoldRush ? 2 : 1;
+      currentHP -= currentTool.power * damageMultiplier;
       
       let particleColor = '#a4e07a';
-      if (activeBlock.name === 'Stone') particleColor = '#888888';
+      if (isGoldRush) particleColor = '#ffcc00';
+      else if (activeBlock.name === 'Stone') particleColor = '#888888';
       else if (activeBlock.name === 'Coal Ore') particleColor = '#3a3a3a';
       else if (activeBlock.name === 'Iron Ore') particleColor = '#cc9966';
       else if (activeBlock.name === 'Gold Ore') particleColor = '#ffcc00';
       else if (activeBlock.name === 'Diamond Ore') particleColor = '#5de2e7';
       
       spawnParticles(particleColor);
+      if (isGoldRush) {
+        spawnParticles('#ffd700'); // extra golden sparkles
+      }
       
       if (currentHP <= 0) {
         playBreakSound();
         
         let rewardTexts = [];
+        const resourceMultiplier = isGoldRush ? 3 : 1;
         for (const res in activeBlock.drops) {
-          const qty = activeBlock.drops[res];
+          const qty = activeBlock.drops[res] * resourceMultiplier;
           state.inventory[res] = (state.inventory[res] || 0) + qty;
           
           let label = res;
@@ -1330,7 +1600,17 @@ document.addEventListener('DOMContentLoaded', () => {
         spawnFloatingText(rewardTexts.join(' '));
         saveState();
         updateUI();
-        spawnNewBlock();
+        
+        if (isGoldRush) {
+          // Immediately spawn another golden block for rapid mining
+          currentHP = 5;
+          symbolEl.innerHTML = `<img src="src/assets/images/minecraft/gold.jpg" alt="Golden Block" />`;
+          nameEl.textContent = "Golden Block";
+          cracksEl.className = 'mc-block-cracks';
+          updateHPBar();
+        } else {
+          spawnNewBlock();
+        }
       } else {
         playHitSound();
         updateHPBar();
@@ -1344,7 +1624,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.tier++;
       
       if (state.tier === 5) {
-        playNetherStarSound();
+        playNetheriteUpgradeSound();
         if (window.unlockPassportStamp) {
           window.unlockPassportStamp('hacker');
         }
@@ -1358,6 +1638,374 @@ document.addEventListener('DOMContentLoaded', () => {
       updateUI();
       spawnNewBlock();
     });
+    
+    // Mobs, Health Bar, Hit Flash, and Game Over setup (Desktop only)
+    if (isDesktop) {
+      let healthBar = document.getElementById('mc-health-bar');
+      if (!healthBar) {
+        healthBar = document.createElement('div');
+        healthBar.id = 'mc-health-bar';
+        document.body.appendChild(healthBar);
+      }
+      
+      let hitFlash = document.getElementById('mc-hit-flash');
+      if (!hitFlash) {
+        hitFlash = document.createElement('div');
+        hitFlash.id = 'mc-hit-flash';
+        document.body.appendChild(hitFlash);
+      }
+      
+      let gameOverOverlay = document.getElementById('mc-gameover-overlay');
+      if (!gameOverOverlay) {
+        gameOverOverlay = document.createElement('div');
+        gameOverOverlay.id = 'mc-gameover-overlay';
+        gameOverOverlay.innerHTML = `
+          <div class="mc-go-title">You died!</div>
+          <div class="mc-go-sub">Score: <span id="mc-go-score">0</span></div>
+          <button class="mc-go-btn" id="mc-respawn-btn">Respawn</button>
+        `;
+        document.body.appendChild(gameOverOverlay);
+      }
+      
+      let endermanEl = document.getElementById('mc-enderman');
+      if (!endermanEl) {
+        endermanEl = document.createElement('img');
+        endermanEl.id = 'mc-enderman';
+        endermanEl.className = 'mc-mob';
+        endermanEl.src = 'src/assets/images/minecraft/Enderman_Screaming.webp';
+        endermanEl.style.width = '50px';
+        endermanEl.style.height = '85px';
+        document.body.appendChild(endermanEl);
+      }
+      
+      let wardenEl = document.getElementById('mc-warden');
+      if (!wardenEl) {
+        wardenEl = document.createElement('img');
+        wardenEl.id = 'mc-warden';
+        wardenEl.className = 'mc-mob';
+        wardenEl.src = 'src/assets/images/minecraft/Warden_sniffing.webp';
+        wardenEl.style.width = '75px';
+        wardenEl.style.height = '75px';
+        document.body.appendChild(wardenEl);
+      }
+      
+      const enderman = {
+        x: 50,
+        y: window.innerHeight - 150,
+        width: 50,
+        height: 85,
+        lastTeleport: Date.now(),
+        wanderTargetX: 50,
+        wanderTargetY: window.innerHeight - 150,
+        wanderWaitUntil: 0
+      };
+      
+      const warden = {
+        x: window.innerWidth - 150,
+        y: window.innerHeight - 150,
+        width: 75,
+        height: 75,
+        wanderTargetX: window.innerWidth - 150,
+        wanderTargetY: window.innerHeight - 150,
+        wanderWaitUntil: 0
+      };
+      
+      function pickWanderTarget(mob, consoleRect) {
+        const minY = window.innerHeight * 0.75;
+        for (let i = 0; i < 25; i++) {
+          const tx = Math.random() * (window.innerWidth - mob.width);
+          const ty = minY + Math.random() * (window.innerHeight - minY - mob.height);
+          if (!consoleRect || !isInside(tx, ty, consoleRect)) {
+            mob.wanderTargetX = tx;
+            mob.wanderTargetY = ty;
+            mob.wanderWaitUntil = 0;
+            return;
+          }
+        }
+        mob.wanderTargetX = mob.x;
+        mob.wanderTargetY = mob.y;
+      }
+      
+      function resetMobs() {
+        const consoleRect = getConsoleRect();
+        const minY = window.innerHeight * 0.75;
+        enderman.x = 50;
+        enderman.y = window.innerHeight - 150;
+        warden.x = window.innerWidth - 150;
+        warden.y = window.innerHeight - 150;
+        
+        enderman.y = Math.max(minY, enderman.y);
+        warden.y = Math.max(minY, warden.y);
+        
+        pickWanderTarget(enderman, consoleRect);
+        pickWanderTarget(warden, consoleRect);
+        enderman.wanderWaitUntil = 0;
+        warden.wanderWaitUntil = 0;
+        endermanEl.style.left = `${enderman.x}px`;
+        endermanEl.style.top = `${enderman.y}px`;
+        wardenEl.style.left = `${warden.x}px`;
+        wardenEl.style.top = `${warden.y}px`;
+      }
+      
+      resetMobs();
+      drawHearts(health);
+      
+      document.getElementById('mc-respawn-btn').addEventListener('click', () => {
+        health = 10;
+        isGameOver = false;
+        isInvincible = false;
+        drawHearts(health);
+        gameOverOverlay.classList.remove('visible');
+        resetMobs();
+      });
+      
+      function getConsoleRect() {
+        const consoleEl = document.querySelector('.mc-console');
+        if (!consoleEl) return null;
+        const r = consoleEl.getBoundingClientRect();
+        const padding = 20;
+        return {
+          left: r.left - padding,
+          right: r.right + padding,
+          top: r.top - padding,
+          bottom: r.bottom + padding
+        };
+      }
+      
+      function isInside(x, y, rect) {
+        if (!rect) return false;
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+      }
+      
+      function clipToRectBoundary(x, y, rect) {
+        if (!rect) return { x, y };
+        if (!isInside(x, y, rect)) return { x, y };
+        const dl = Math.abs(x - rect.left);
+        const dr = Math.abs(x - rect.right);
+        const dt = Math.abs(y - rect.top);
+        const db = Math.abs(y - rect.bottom);
+        const min = Math.min(dl, dr, dt, db);
+        if (min === dl) return { x: rect.left, y };
+        if (min === dr) return { x: rect.right, y };
+        if (min === dt) return { x, y: rect.top };
+        return { x, y: rect.bottom };
+      }
+      
+      function triggerHitFlash() {
+        const flash = document.getElementById('mc-hit-flash');
+        if (flash) {
+          flash.style.opacity = '1';
+          setTimeout(() => {
+            flash.style.opacity = '0';
+          }, 100);
+        }
+      }
+      
+      function moveMob(mob, vx, vy, consoleRect) {
+        let nextX = mob.x + vx;
+        let nextY = mob.y + vy;
+        
+        if (consoleRect && isInside(nextX, nextY, consoleRect)) {
+          const wasOutsideX = mob.x < consoleRect.left || mob.x > consoleRect.right;
+          const wasOutsideY = mob.y < consoleRect.top || mob.y > consoleRect.bottom;
+          if (wasOutsideX && !wasOutsideY) {
+            nextX = mob.x;
+          } else if (wasOutsideY && !wasOutsideX) {
+            nextY = mob.y;
+          } else {
+            const clipped = clipToRectBoundary(nextX, nextY, consoleRect);
+            nextX = clipped.x;
+            nextY = clipped.y;
+          }
+        }
+        
+        const minY = window.innerHeight * 0.75;
+        mob.x = Math.max(0, Math.min(window.innerWidth - mob.width, nextX));
+        mob.y = Math.max(minY, Math.min(window.innerHeight - mob.height, nextY));
+      }
+      
+      function updateMobs() {
+        if (isGameOver) {
+          endermanEl.style.left = `${enderman.x}px`;
+          endermanEl.style.top = `${enderman.y}px`;
+          wardenEl.style.left = `${warden.x}px`;
+          wardenEl.style.top = `${warden.y}px`;
+          requestAnimationFrame(updateMobs);
+          return;
+        }
+        
+        const consoleRect = getConsoleRect();
+        const minY = window.innerHeight * 0.75;
+        const isCursorInBottomZone = cursorVisible && targetY >= minY;
+        
+        // ── Proximity and Target Calculation ──
+        const mobCenterW = warden.x + warden.width / 2;
+        const mobCenterH = warden.y + warden.height / 2;
+        const distW = isCursorInBottomZone ? Math.sqrt(Math.pow(targetX - mobCenterW, 2) + Math.pow(targetY - mobCenterH, 2)) : Infinity;
+        
+        const mobCenterE = enderman.x + enderman.width / 2;
+        const mobCenterEH = enderman.y + enderman.height / 2;
+        const distE = isCursorInBottomZone ? Math.sqrt(Math.pow(targetX - mobCenterE, 2) + Math.pow(targetY - mobCenterEH, 2)) : Infinity;
+        
+        const DETECTION_RADIUS = 220;
+        
+        // ── Warden Update ──
+        if (isCursorInBottomZone && distW < DETECTION_RADIUS) {
+          // Chase Mode
+          let targetChaseX = targetX;
+          let targetChaseY = targetY;
+          if (consoleRect && isInside(targetX, targetY, consoleRect)) {
+            const clipped = clipToRectBoundary(targetX, targetY, consoleRect);
+            targetChaseX = clipped.x;
+            targetChaseY = clipped.y;
+          }
+          targetChaseY = Math.max(minY, targetChaseY);
+          
+          const dx = targetChaseX - (warden.x + warden.width / 2);
+          const dy = targetChaseY - (warden.y + warden.height / 2);
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len > 5) {
+            const vx = (dx / len) * 0.8;
+            const vy = (dy / len) * 0.8;
+            moveMob(warden, vx, vy, consoleRect);
+          }
+          warden.wanderWaitUntil = 0; // reset wander timer when chasing
+        } else {
+          // Wander Mode
+          const distToWander = Math.sqrt(Math.pow(warden.wanderTargetX - warden.x, 2) + Math.pow(warden.wanderTargetY - warden.y, 2));
+          if (distToWander < 10) {
+            if (warden.wanderWaitUntil === 0) {
+              warden.wanderWaitUntil = Date.now() + Math.random() * 2000 + 1500;
+            } else if (Date.now() >= warden.wanderWaitUntil) {
+              pickWanderTarget(warden, consoleRect);
+            }
+          } else {
+            const dx = warden.wanderTargetX - warden.x;
+            const dy = warden.wanderTargetY - warden.y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len > 0) {
+              const vx = (dx / len) * 0.3;
+              const vy = (dy / len) * 0.3;
+              moveMob(warden, vx, vy, consoleRect);
+            }
+          }
+        }
+        wardenEl.style.left = `${warden.x}px`;
+        wardenEl.style.top = `${warden.y}px`;
+        
+        // ── Enderman Update ──
+        const endermanChasing = isCursorInBottomZone && distE < DETECTION_RADIUS;
+        // Teleportation (frequent if chasing, rare if wandering)
+        const teleportInterval = endermanChasing ? 4500 : 15000;
+        if (Date.now() - enderman.lastTeleport > teleportInterval) {
+          let teleported = false;
+          // When wandering, teleport near current position or pick completely random target
+          const refX = endermanChasing ? targetX : enderman.x;
+          const refY = endermanChasing ? targetY : enderman.y;
+          const refDist = endermanChasing ? 180 : 300;
+          
+          for (let a = 0; a < 15; a++) {
+            const ang = Math.random() * Math.PI * 2;
+            const dst = 100 + Math.random() * refDist;
+            const tx = refX + Math.cos(ang) * dst;
+            let ty = refY + Math.sin(ang) * dst;
+            
+            ty = Math.max(minY, Math.min(window.innerHeight - enderman.height, ty));
+            
+            if (tx > 20 && tx < window.innerWidth - 70) {
+              if (!consoleRect || !isInside(tx, ty, consoleRect)) {
+                spawnPurpleParticles(enderman.x + enderman.width / 2, enderman.y + enderman.height / 2);
+                enderman.x = tx;
+                enderman.y = ty;
+                spawnPurpleParticles(enderman.x + enderman.width / 2, enderman.y + enderman.height / 2);
+                enderman.lastTeleport = Date.now();
+                teleported = true;
+                if (!endermanChasing) {
+                  pickWanderTarget(enderman, consoleRect);
+                }
+                break;
+              }
+            }
+          }
+        }
+        
+        if (endermanChasing) {
+          // Chase Mode
+          let targetChaseX = targetX;
+          let targetChaseY = targetY;
+          if (consoleRect && isInside(targetX, targetY, consoleRect)) {
+            const clipped = clipToRectBoundary(targetX, targetY, consoleRect);
+            targetChaseX = clipped.x;
+            targetChaseY = clipped.y;
+          }
+          targetChaseY = Math.max(minY, targetChaseY);
+          
+          const dx = targetChaseX - (enderman.x + enderman.width / 2);
+          const dy = targetChaseY - (enderman.y + enderman.height / 2);
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len > 5) {
+            const vx = (dx / len) * 1.2;
+            const vy = (dy / len) * 1.2;
+            moveMob(enderman, vx, vy, consoleRect);
+          }
+          enderman.wanderWaitUntil = 0;
+        } else {
+          // Wander Mode
+          const distToWander = Math.sqrt(Math.pow(enderman.wanderTargetX - enderman.x, 2) + Math.pow(enderman.wanderTargetY - enderman.y, 2));
+          if (distToWander < 10) {
+            if (enderman.wanderWaitUntil === 0) {
+              enderman.wanderWaitUntil = Date.now() + Math.random() * 2000 + 1500;
+            } else if (Date.now() >= enderman.wanderWaitUntil) {
+              pickWanderTarget(enderman, consoleRect);
+            }
+          } else {
+            const dx = enderman.wanderTargetX - enderman.x;
+            const dy = enderman.wanderTargetY - enderman.y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len > 0) {
+              const vx = (dx / len) * 0.45;
+              const vy = (dy / len) * 0.45;
+              moveMob(enderman, vx, vy, consoleRect);
+            }
+          }
+        }
+        endermanEl.style.left = `${enderman.x}px`;
+        endermanEl.style.top = `${enderman.y}px`;
+        
+        // ── Collision Checks ──
+        if (cursorVisible && !isInvincible) {
+          const hitW = (targetX >= warden.x + 5 && targetX <= warden.x + warden.width - 5 &&
+                        targetY >= warden.y + 5 && targetY <= warden.y + warden.height - 5);
+          const hitE = (targetX >= enderman.x + 5 && targetX <= enderman.x + enderman.width - 5 &&
+                        targetY >= enderman.y + 5 && targetY <= enderman.y + enderman.height - 5);
+                        
+          if (hitW || hitE) {
+            health -= 2; // Lose 1 full heart (2 HP)
+            playHurtSound();
+            triggerHitFlash();
+            if (health <= 0) {
+              health = 0;
+              isGameOver = true;
+              const totalScore = state.inventory.cobble + state.inventory.coal * 2 + state.inventory.iron * 5 + state.inventory.gold * 10 + state.inventory.diamond * 20;
+              document.getElementById('mc-go-score').textContent = totalScore;
+              document.getElementById('mc-gameover-overlay').classList.add('visible');
+            } else {
+              isInvincible = true;
+              healthBar.classList.add('mc-heart-invincible');
+              setTimeout(() => {
+                isInvincible = false;
+                healthBar.classList.remove('mc-heart-invincible');
+              }, 1000);
+            }
+            drawHearts(health);
+          }
+        }
+        
+        requestAnimationFrame(updateMobs);
+      }
+      
+      requestAnimationFrame(updateMobs);
+    }
     
     updateUI();
     spawnNewBlock();
