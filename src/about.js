@@ -675,7 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const stamps = {
       melophile: document.getElementById('stamp-melophile'),
       hacker: document.getElementById('stamp-hacker'),
-      investigator: document.getElementById('stamp-investigator')
+      investigator: document.getElementById('stamp-investigator'),
+      miner: document.getElementById('stamp-miner')
     };
 
     function updateStampVisuals(key) {
@@ -1507,6 +1508,10 @@ document.addEventListener('DOMContentLoaded', () => {
       blockEl.classList.add('shake');
       setTimeout(() => blockEl.classList.remove('shake'), 150);
       
+      if (window.unlockPassportStamp) {
+        window.unlockPassportStamp('miner');
+      }
+      
       // Handle tap combo
       const now = Date.now();
       if (now - lastTapTime < 800) {
@@ -1989,6 +1994,15 @@ document.addEventListener('DOMContentLoaded', () => {
               const totalScore = state.inventory.cobble + state.inventory.coal * 2 + state.inventory.iron * 5 + state.inventory.gold * 10 + state.inventory.diamond * 20;
               document.getElementById('mc-go-score').textContent = totalScore;
               document.getElementById('mc-gameover-overlay').classList.add('visible');
+              
+              // Reset pickaxe level to Hand (tier 0) on death, but preserve inventory resources
+              state.tier = 0;
+              saveState();
+              updateUI();
+              window.currentMinecraftTier = 0;
+              if (typeof window.updateGlobalCursor === 'function') {
+                window.updateGlobalCursor(0);
+              }
             } else {
               isInvincible = true;
               healthBar.classList.add('mc-heart-invincible');

@@ -1172,8 +1172,8 @@ body {
 
 .passport-stamps-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   width: 100%;
 }
 
@@ -1234,6 +1234,7 @@ body {
 .passport-stamp-slot:nth-child(1).unlocked { --rot: -4deg; }
 .passport-stamp-slot:nth-child(2).unlocked { --rot: 2deg; }
 .passport-stamp-slot:nth-child(3).unlocked { --rot: -2deg; }
+.passport-stamp-slot:nth-child(4).unlocked { --rot: 3deg; }
 
 /* Apply holes to unlocked stamps only */
 .passport-stamp-slot:not(.unlocked) .stamp-holes {
