@@ -43,7 +43,17 @@
 
         <!-- ── Hero Section ────────────────────────────── -->
         <section class="about-hero" id="about-hero">
-            <h1 class="about-hero-title">Hey, I'm Anmol Raj</h1>
+            <h1 class="about-hero-title" style="position: relative;">
+                Hey, I'm Anmol Raj
+                <div class="purple-flame-container" style="top: 0px; left: -50px;">
+                    <div class="purple-flame-outer"></div>
+                    <div class="purple-flame-core"></div>
+                </div>
+                <div class="purple-flame-container" style="top: 0px; right: -50px;">
+                    <div class="purple-flame-outer"></div>
+                    <div class="purple-flame-core"></div>
+                </div>
+            </h1>
             <p class="about-hero-subtitle">I love listening to sad radiohead songs.</p>
             <div class="vinyl-player-container">
                 <div class="vinyl-player" id="vinyl-player">
@@ -62,9 +72,13 @@
 
         <!-- ── Minecraft Mini Game Section ────────────────────────────– -->
         <section class="about-content-section" id="minecraft-section">
-            <div class="section-header">
-                <div class="section-kicker" style="color: #c084fc;">Nether Escape</div>
-                <h2 class="section-title" style="border-color: #c084fc;">Escape the Nether</h2>
+            <div class="section-header" style="position: relative;">
+                <div class="purple-flame-container" style="top: 10px; left: -40px;">
+                    <div class="purple-flame-outer"></div>
+                    <div class="purple-flame-core"></div>
+                </div>
+                <div class="section-kicker" style="color: #9333ea;">Nether Escape</div>
+                <h2 class="section-title" style="border-color: #9333ea;">Escape the Nether</h2>
                 <p class="section-description" style="color: #e9d5ff;">
                     Your portal is broken! Mine 10 Obsidian blocks to rebuild it and escape before the Endermen catch
                     you.
@@ -72,7 +86,17 @@
                 </p>
             </div>
 
-            <div class="mc-console-wrapper">
+            <div class="mc-console-wrapper" style="position: relative;">
+                <!-- Left Side Console Flame -->
+                <div class="purple-flame-container" style="top: 40px; left: -45px;">
+                    <div class="purple-flame-outer"></div>
+                    <div class="purple-flame-core"></div>
+                </div>
+                <!-- Right Side Console Flame -->
+                <div class="purple-flame-container" style="top: 40px; right: -45px;">
+                    <div class="purple-flame-outer"></div>
+                    <div class="purple-flame-core"></div>
+                </div>
                 <div class="mc-console">
                     <!-- Screen Area -->
                     <div class="mc-screen">
@@ -89,7 +113,7 @@
                             </div>
                             <div class="mc-block-hp-text" id="mc-block-hp-text">HP: 40 / 40</div>
                             <div class="mc-obsidian-count" id="mc-obsidian-count"
-                                style="font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: #c084fc; margin-top: 4px; font-weight: bold;">
+                                style="font-family: 'Courier Prime', monospace; font-size: 0.78rem; color: #9333ea; margin-top: 4px; font-weight: bold;">
                                 Obsidian Mined: 0 / 10</div>
                         </div>
                     </div>
@@ -128,7 +152,7 @@
                         <!-- Upgrade Action Panel -->
                         <div class="mc-actions">
                             <button class="mc-btn" id="mc-escape-btn" type="button" disabled
-                                style="display: none; border-color: #c084fc; color: #c084fc;">
+                                style="display: none; border-color: #9333ea; color: #9333ea;">
                                 <span class="mc-btn-label">ESCAPE THE NETHER</span>
                                 <span class="mc-btn-cost" id="mc-escape-status">Portal Inactive</span>
                             </button>

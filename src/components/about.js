@@ -1691,7 +1691,7 @@ function startAboutPage() {
     function showWarning() {
       if (state.tier === 6 && warningEl) {
         warningEl.textContent = "WARNING: If you die in the Nether, all inventory will be lost!";
-        warningEl.style.color = "#c084fc";
+        warningEl.style.color = "#9333ea";
       }
     }
     
@@ -1740,7 +1740,7 @@ function startAboutPage() {
         spawnParticles('#5de2e7');
       } else if (state.tier === 6) {
         playUpgradeSound();
-        spawnParticles('#c084fc');
+        spawnParticles('#9333ea');
       } else {
         playUpgradeSound();
       }

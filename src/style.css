@@ -1468,13 +1468,12 @@ body.scroll-locked {
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
-  perspective: 150px;
-  /* Perfect depth ratio for panorama rotateY folding */
+  perspective: 1100px;
 }
 
 .projects-section.visible .projects-stack-scene {
   opacity: 1;
-  transform: translateY(10);
+  transform: translateY(0);
 }
 
 .projects-stack {
@@ -1490,11 +1489,16 @@ body.scroll-locked {
   inset: 0;
   width: 100%;
   height: 100%;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   transition: none;
-  /* Smooth animations managed dynamically in JS physics loop */
   pointer-events: none;
   transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.stack-slot.active .project-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .stack-slot.active {
@@ -1870,133 +1874,303 @@ project-card {
 .signal-panel {
   position: relative;
   min-height: 420px;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
-    rgba(5, 5, 5, 0.78);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.045) 0%, transparent 42%),
+    rgba(6, 6, 6, 0.88);
   overflow: hidden;
   transform-style: preserve-3d;
-  transition: transform 0.25s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-}
-
-.signal-panel:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 40px rgba(255, 255, 255, 0.035);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.45s ease, box-shadow 0.45s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .signal-panel::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 72%);
-  opacity: 0.34;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  pointer-events: none;
 }
 
-.signal-panel-header,
-.signal-readout,
-.signal-lines {
+.signal-panel:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 28px 70px rgba(0, 0, 0, 0.55);
+}
+
+.signal-ambient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle 140px at 50% 40%, rgba(255, 255, 255, 0.09), transparent 68%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.signal-panel:hover .signal-ambient {
+  opacity: 1;
+}
+
+.signal-panel-inner {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 390px;
 }
 
 .signal-panel-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.signal-live {
-  color: #ffffff;
-}
-
-.signal-readout {
-  display: grid;
+  align-items: flex-start;
   gap: 1rem;
-  margin-top: 4rem;
 }
 
-.signal-readout>div {
+.signal-panel-title {
   display: flex;
-  justify-content: space-between;
-  align-items: end;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-direction: column;
+  gap: 5px;
 }
 
-.readout-value {
-  font-size: clamp(2.2rem, 7vw, 4.5rem);
-  font-weight: 900;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
+.signal-brand {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: #ffffff;
 }
 
-.readout-label {
-  max-width: 120px;
-  text-align: right;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+.signal-sub {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.34);
 }
 
-.signal-lines {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+.signal-status {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  height: 80px;
-  margin-top: 3rem;
-  align-items: end;
+  position: relative;
+  padding-top: 2px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.signal-lines span {
+.signal-status-dot {
   display: block;
-  min-height: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  transform-origin: bottom;
-  animation: signalPulse 1.8s ease-in-out infinite;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+  animation: signalStatusBreath 3.2s ease-in-out infinite;
 }
 
-.signal-lines span:nth-child(2) {
-  animation-delay: 0.18s;
-}
-
-.signal-lines span:nth-child(3) {
-  animation-delay: 0.34s;
-}
-
-.signal-lines span:nth-child(4) {
-  animation-delay: 0.08s;
-}
-
-.signal-lines span:nth-child(5) {
-  animation-delay: 0.26s;
-}
-
-@keyframes signalPulse {
+@keyframes signalStatusBreath {
 
   0%,
   100% {
-    transform: scaleY(0.35);
-    opacity: 0.28;
+    opacity: 0.45;
+    transform: scale(0.9);
   }
 
   50% {
-    transform: scaleY(1);
-    opacity: 0.9;
+    opacity: 1;
+    transform: scale(1);
   }
+}
+
+.signal-status::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scaleX(0.35);
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.signal-panel:hover .signal-status::after {
+  transform: scaleX(1);
+}
+
+.signal-dial {
+  position: relative;
+  width: min(100%, 240px);
+  margin: 2rem auto 1.75rem;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.signal-dial-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.signal-dial-inner {
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1;
+}
+
+.signal-dial-track {
+  stroke: rgba(255, 255, 255, 0.09);
+  stroke-width: 1;
+  stroke-dasharray: 367 490;
+  stroke-linecap: round;
+}
+
+.signal-dial-fill {
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  stroke-dasharray: 367 490;
+  stroke-dashoffset: 367;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.signal-dial-ticks line {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.signal-dial-core {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.signal-dial-value {
+  font-size: clamp(2.6rem, 9vw, 3.6rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.signal-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+  position: relative;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.signal-metrics::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1.5rem;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+}
+
+.signal-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 1rem;
+}
+
+.signal-metric:first-child {
+  padding-left: 0;
+}
+
+.signal-metric:last-child {
+  padding-right: 0;
+  text-align: right;
+}
+
+.signal-metric .readout-value {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.readout-value {
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.signal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.signal-foot-time {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+/* Lab scroll track */
+.lab-scroll-track {
+  position: relative;
+  min-height: 100vh;
+}
+
+@media (min-width: 769px) {
+  .lab-scroll-track .lab-section {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.lab-section-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .lab-section {
@@ -2005,7 +2179,58 @@ project-card {
 
 .lab-title {
   max-width: 860px;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+}
+
+.lab-scroll-text {
+  margin-top: clamp(1rem, 3vw, 2rem);
+}
+
+.lab-scroll-text-viewport {
+  overflow: hidden;
+  padding: 0.12em 0;
+}
+
+.lab-scroll-text-track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.lab-scroll-text-item {
+
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: auto;
+  min-height: 1.05em;
+  max-width: 860px;
+  font-size: clamp(2.4rem, 7vw, 5.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #4d4d4d;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+  transform-origin: left center;
+}
+
+.lab-scroll-text-item.is-active {
+  ::selection {
+    background: #ffffff;
+    color: #000000;
+  }
+  ::-webkit-selection {
+    background: #ffffff;
+    color: #000000;
+  }
+  ::-moz-selection {
+    background: #ffffff;
+    color: #000000;
+  }
+  opacity: 1;
+  visibility: visible;
 }
 
 .lab-orbit {
@@ -2407,17 +2632,41 @@ project-card {
   }
 
   .about-title,
-  .lab-title {
+  .lab-title,
+  .lab-scroll-text-item {
     font-size: clamp(2.3rem, 14vw, 4rem);
-    line-height: 1;
+    line-height: 1.05;
+  }
+
+  .lab-scroll-text-viewport {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .lab-scroll-text-track {
+    gap: 0.15rem;
+  }
+
+  .lab-scroll-text-item {
+    height: auto;
+    color: #ffffff;
+    opacity: 1;
+    visibility: visible;
   }
 
   .signal-panel {
-    min-height: 360px;
+    min-height: 380px;
+    padding: 1.25rem;
   }
 
-  .signal-readout {
-    margin-top: 2.5rem;
+  .signal-panel-inner {
+    min-height: 350px;
+  }
+
+  .signal-dial {
+    width: min(100%, 200px);
+    margin-top: 1.5rem;
   }
 
   .lab-console-text {

@@ -56,8 +56,8 @@ function startAboutPage() {
   // ── Image Cursor ──────────────────────────────────
   const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   let cursorEl = null;
-  let cursorX = 0, cursorY = 0;
-  let targetX = 0, targetY = 0;
+  let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
+  let targetX = window.innerWidth / 2, targetY = window.innerHeight / 2;
   let cursorVisible = false;
   let cursorRAF = null;
 
@@ -128,28 +128,13 @@ function startAboutPage() {
     `;
     document.head.appendChild(cursorStyle);
 
-    // Track mouse
-    window.addEventListener('mousemove', (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-      if (!cursorVisible) {
-        cursorVisible = true;
-        cursorEl.classList.add('visible');
-        // Snap to first position
-        cursorX = targetX;
-        cursorY = targetY;
-        cursorEl.style.transform = `translate(${cursorX - 20}px, ${cursorY - 20}px)`;
-      }
-    }, { passive: true });
-
+    // Visual cursor show/hide listeners
     window.addEventListener('mouseenter', () => {
-      cursorEl.classList.add('visible');
-      cursorVisible = true;
+      if (cursorEl) cursorEl.classList.add('visible');
     });
 
     window.addEventListener('mouseleave', () => {
-      cursorEl.classList.remove('visible');
-      cursorVisible = false;
+      if (cursorEl) cursorEl.classList.remove('visible');
     });
 
     window.updateGlobalCursor = function (tier) {
@@ -230,6 +215,52 @@ function startAboutPage() {
     }
     animateCursor();
   }
+
+  // Track mouse and touch coordinates unconditionally (for Endermen AI)
+  window.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!cursorVisible) {
+      cursorVisible = true;
+      if (cursorEl) {
+        cursorEl.classList.add('visible');
+        // Snap custom cursor to first position
+        cursorX = targetX;
+        cursorY = targetY;
+        cursorEl.style.transform = `translate(${cursorX - 20}px, ${cursorY - 20}px)`;
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('mouseenter', () => {
+    cursorVisible = true;
+    if (cursorEl) cursorEl.classList.add('visible');
+  });
+
+  window.addEventListener('mouseleave', () => {
+    cursorVisible = false;
+    if (cursorEl) cursorEl.classList.remove('visible');
+  });
+
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length > 0) {
+      targetX = e.touches[0].clientX;
+      targetY = e.touches[0].clientY;
+      if (!cursorVisible) {
+        cursorVisible = true;
+        cursorX = targetX;
+        cursorY = targetY;
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 0) {
+      targetX = e.touches[0].clientX;
+      targetY = e.touches[0].clientY;
+      cursorVisible = true;
+    }
+  }, { passive: true });
 
   // ── Constellation Canvas ──────────────────────────
   initConstellation();
@@ -1263,6 +1294,27 @@ function startAboutPage() {
       screenEl.appendChild(ft);
       setTimeout(() => ft.remove(), 800);
     }
+
+    function spawnPurpleParticles(cx, cy) {
+      const count = 6 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'mc-particle';
+        const dx = (Math.random() - 0.5) * 60 + 'px';
+        const dy = (Math.random() - 0.5) * 60 + 'px';
+        const rot = (Math.random() * 360) + 'deg';
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+        p.style.setProperty('--rot', rot);
+        p.style.setProperty('--color', '#c084fc');
+        p.style.left = `${cx}px`;
+        p.style.top = `${cy}px`;
+        p.style.position = 'fixed';
+        p.style.zIndex = '10003';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+      }
+    }
     
     blockEl.addEventListener('click', () => {
       if (obsidianMined >= 10) {
@@ -1329,10 +1381,7 @@ function startAboutPage() {
       }
     }
     
-    const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    
-    if (isDesktop) {
-      let healthBar = document.getElementById('mc-health-bar');
+    let healthBar = document.getElementById('mc-health-bar');
       if (!healthBar) {
         healthBar = document.createElement('div');
         healthBar.id = 'mc-health-bar';
@@ -1351,9 +1400,9 @@ function startAboutPage() {
         gameOverOverlay = document.createElement('div');
         gameOverOverlay.id = 'mc-gameover-overlay';
         gameOverOverlay.innerHTML = `
-          <div class="mc-go-title" style="color: #c084fc;">YOU DIED!</div>
+          <div class="mc-go-title" style="color: #9333ea;">YOU DIED!</div>
           <div class="mc-go-sub">Inventory Lost in Nether</div>
-          <button class="mc-go-btn" id="mc-respawn-btn" style="background: #3b0764; border-color: #c084fc;">RESPAWN</button>
+          <button class="mc-go-btn" id="mc-respawn-btn" style="background: #3b0764; border-color: #9333ea;">RESPAWN</button>
         `;
         document.body.appendChild(gameOverOverlay);
       }
@@ -1388,7 +1437,7 @@ function startAboutPage() {
       }
       
       function pickWanderTarget(mob, consoleRect) {
-        const minY = window.innerHeight * 0.7;
+        const minY = 72;
         for (let i = 0; i < 25; i++) {
           const tx = Math.random() * (window.innerWidth - mob.width);
           const ty = minY + Math.random() * (window.innerHeight - minY - mob.height);
@@ -1405,10 +1454,10 @@ function startAboutPage() {
       
       function resetMobs() {
         const consoleRect = getConsoleRect();
-        const minY = window.innerHeight * 0.7;
+        const minY = 72;
         endermen.forEach((enderman, idx) => {
           enderman.x = 50 + idx * (window.innerWidth / (ENDERMAN_COUNT + 1));
-          enderman.y = window.innerHeight - 150 - (Math.random() * 100);
+          enderman.y = minY + Math.random() * (window.innerHeight - 150 - minY);
           enderman.y = Math.max(minY, enderman.y);
           pickWanderTarget(enderman, consoleRect);
           enderman.wanderWaitUntil = 0;
@@ -1486,7 +1535,7 @@ function startAboutPage() {
             nextY = clipped.y;
           }
         }
-        const minY = window.innerHeight * 0.7;
+        const minY = 72;
         mob.x = Math.max(0, Math.min(window.innerWidth - mob.width, nextX));
         mob.y = Math.max(minY, Math.min(window.innerHeight - mob.height, nextY));
       }
@@ -1502,8 +1551,8 @@ function startAboutPage() {
         }
         
         const consoleRect = getConsoleRect();
-        const minY = window.innerHeight * 0.7;
-        const isCursorInBottomZone = cursorVisible && targetY >= minY;
+        const minY = 72;
+        const isCursorInBottomZone = cursorVisible;
         const DETECTION_RADIUS = 280;
         
         endermen.forEach((enderman, idx) => {
@@ -1512,7 +1561,7 @@ function startAboutPage() {
           const mobCenterEH = enderman.y + enderman.height / 2;
           const distE = isCursorInBottomZone ? Math.sqrt(Math.pow(targetX - mobCenterE, 2) + Math.pow(targetY - mobCenterEH, 2)) : Infinity;
           
-          const endermanChasing = isCursorInBottomZone && distE < DETECTION_RADIUS;
+          const endermanChasing = isCursorInBottomZone;
           const teleportInterval = endermanChasing ? 4000 : 12000;
           
           if (Date.now() - enderman.lastTeleport > teleportInterval) {
@@ -1614,7 +1663,6 @@ function startAboutPage() {
         requestAnimationFrame(updateMobs);
       }
       requestAnimationFrame(updateMobs);
-    }
     
     updateUI();
     updateHPBar();

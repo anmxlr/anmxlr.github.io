@@ -214,8 +214,120 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalSlots = 0;
   let slots = [];
 
+  const PROJECT_HOLD_VH = 0.5;
+  const PROJECT_TRANS_VH = 0.15;
+
+  function easeInOutCubic(t) {
+    const x = Math.min(Math.max(t, 0), 1);
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+
+  function getProjectsScrollableVh(slotCount) {
+    if (slotCount <= 1) return 0;
+    return slotCount * PROJECT_HOLD_VH + (slotCount - 1) * PROJECT_TRANS_VH;
+  }
+
+  function scrolledToProjectProgress(scrolledPx, slotCount) {
+    if (slotCount <= 1) return 0;
+
+    const vh = window.innerHeight;
+    let cursorVh = 0;
+
+    for (let i = 0; i < slotCount; i++) {
+      if (scrolledPx / vh < cursorVh + PROJECT_HOLD_VH) {
+        return i / (slotCount - 1);
+      }
+      cursorVh += PROJECT_HOLD_VH;
+
+      if (i < slotCount - 1) {
+        if (scrolledPx / vh < cursorVh + PROJECT_TRANS_VH) {
+          const t = easeInOutCubic((scrolledPx / vh - cursorVh) / PROJECT_TRANS_VH);
+          return (i + t) / (slotCount - 1);
+        }
+        cursorVh += PROJECT_TRANS_VH;
+      }
+    }
+
+    return 1;
+  }
+
+  function lockIndexToProjectScrollPx(lockIndex, slotCount) {
+    const vh = window.innerHeight;
+    let cursorVh = 0;
+
+    for (let i = 0; i < lockIndex; i++) {
+      cursorVh += PROJECT_HOLD_VH + PROJECT_TRANS_VH;
+    }
+    cursorVh += PROJECT_HOLD_VH * 0.5;
+    return cursorVh * vh;
+  }
+
+  function applyDesktopStackSlots(fractionalIndex, slotCount) {
+    if (!slots.length || slotCount <= 0) return;
+    const activeIndex = slotCount > 1 ? fractionalIndex * (slotCount - 1) : 0;
+
+    slots.forEach((slot, index) => {
+      const x = slotCount > 1 ? index - activeIndex : 0;
+      const absX = Math.abs(x);
+
+      if (absX > 1.25) {
+        slot.style.opacity = '0';
+        slot.style.visibility = 'hidden';
+        slot.style.pointerEvents = 'none';
+        slot.style.filter = 'none';
+        slot.classList.remove('active');
+        return;
+      }
+
+      slot.style.visibility = 'visible';
+      const isActive = absX < 0.28;
+      slot.classList.toggle('active', isActive);
+      slot.style.pointerEvents = isActive ? 'auto' : 'none';
+
+      const scale = 1 - Math.min(absX * 0.05, 0.11);
+      const translateY = x * -18;
+      const translateZ = -absX * 64;
+      const rotateY = Math.max(-7, Math.min(7, x * -4.5));
+      const opacity = absX < 0.06 ? 1 : Math.max(0, 0.95 - absX * 0.78);
+
+      slot.style.zIndex = String(100 - Math.round(absX * 10));
+      slot.style.transform = `translate3d(0, ${translateY}px, ${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
+      slot.style.opacity = String(opacity);
+      slot.style.filter = absX > 0.5 ? `blur(${Math.min((absX - 0.5) * 2.8, 2)}px)` : 'none';
+    });
+  }
+
+  function applyMobileStackSlots() {
+    if (!projectsScroller || !slots.length) return;
+    const scrollerWidth = projectsScroller.clientWidth;
+    const scrollerCenter = projectsScroller.scrollLeft + scrollerWidth / 2;
+
+    slots.forEach((slot) => {
+      const slotWidth = slot.offsetWidth || 290;
+      const slotCenter = slot.offsetLeft + slotWidth / 2;
+      const diff = slotCenter - scrollerCenter;
+      const gap = 20;
+      const normalizedDiff = diff / (slotWidth + gap);
+      const absDiff = Math.abs(normalizedDiff);
+
+      const isActive = absDiff < 0.38;
+      slot.classList.toggle('active', isActive);
+      slot.style.pointerEvents = isActive ? 'auto' : 'none';
+      slot.style.visibility = absDiff > 1.1 ? 'hidden' : 'visible';
+
+      const scale = 1 - Math.min(0.1, absDiff * 0.12);
+      const opacity = absDiff < 0.08 ? 1 : Math.max(0, 0.96 - absDiff * 0.7);
+      const rotateY = normalizedDiff * -5;
+      const translateX = normalizedDiff * -14;
+
+      slot.style.transform = `translate3d(${translateX}px, 0, 0) scale(${scale}) rotateY(${rotateY}deg)`;
+      slot.style.opacity = String(opacity);
+      slot.style.filter = absDiff > 0.35 ? `blur(${Math.min((absDiff - 0.35) * 2.5, 2)}px)` : 'none';
+    });
+  }
+
   initConstellation();
-  initLabConsole();
+  initLabScroll();
   initHiddenTerminal();
   initSignalPanel();
   initEasterEggs();
@@ -310,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isMobile) {
         projectsTrack.style.height = 'auto';
       } else {
-        projectsTrack.style.height = `${window.innerHeight + (totalSlots - 1) * window.innerHeight * 0.95}px`;
+        projectsTrack.style.height = `${window.innerHeight + getProjectsScrollableVh(totalSlots) * window.innerHeight}px`;
       }
     }
     window.addEventListener('resize', handleResize);
@@ -343,30 +455,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Desktop Page Scroll (Sticky Pinning) logic
     window.addEventListener('scroll', () => {
-      if (window.innerWidth <= 768) return; // Handled by inner horizontal scroll on mobile
+      if (window.innerWidth <= 768) return;
 
       const trackRect = projectsTrack.getBoundingClientRect();
       const trackHeight = trackRect.height - window.innerHeight;
       if (trackHeight <= 0) return;
 
-      const scrolled = -trackRect.top;
-      const progress = Math.min(Math.max(scrolled / trackHeight, 0), 1);
-      targetProgress = progress;
+      const scrolled = Math.min(Math.max(-trackRect.top, 0), trackHeight);
+      targetProgress = scrolledToProjectProgress(scrolled, totalSlots);
 
-      // Heavy Snapping Gravity Lock
       clearTimeout(pageSnapTimer);
-      if (trackRect.top <= 80 && trackRect.bottom >= window.innerHeight - 80) {
+      if (trackRect.top <= 80 && trackRect.bottom >= window.innerHeight - 80 && totalSlots > 1) {
         pageSnapTimer = setTimeout(() => {
-          if (totalSlots <= 1) return;
           const snapIndex = Math.round(targetProgress * (totalSlots - 1));
-          const snapProgress = snapIndex / (totalSlots - 1);
-          const snapScrollTop = window.scrollY + trackRect.top + (snapProgress * trackHeight);
-          
+          const snapOffset = lockIndexToProjectScrollPx(snapIndex, totalSlots);
+          if (Math.abs(scrolled - snapOffset) < 32) return;
+
           window.scrollTo({
-            top: snapScrollTop,
+            top: window.scrollY + trackRect.top + snapOffset,
             behavior: 'smooth'
           });
-        }, 250); // Gravity locks in after 250ms of scroll idle
+        }, 320);
       }
     }, { passive: true });
 
@@ -388,89 +497,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // Animation Loop (lerps scroll progress, custom cursor ring, and parallax coordinates)
   function renderLoop() {
     const isMobile = window.innerWidth <= 768;
+    const progressDelta = Math.abs(targetProgress - currentProgress);
+    const progressLerp = progressDelta > 0.01 ? 0.14 : 0.1;
 
-    if (isMobile) {
-      // Lerp progress bar for smoothness on mobile
-      currentProgress += (targetProgress - currentProgress) * 0.15;
-      if (projectsProgress) {
-        projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
+    currentProgress += (targetProgress - currentProgress) * progressLerp;
+
+    if (projectsProgress) {
+      projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
+    }
+
+    if (slots.length && totalSlots > 0) {
+      if (isMobile) {
+        applyMobileStackSlots();
+      } else {
+        applyDesktopStackSlots(currentProgress, totalSlots);
       }
-      
-      const scrollerWidth = projectsScroller.clientWidth;
-      const scrollerCenter = projectsScroller.scrollLeft + scrollerWidth / 2;
+    }
 
-      slots.forEach((slot, index) => {
-        const slotWidth = slot.offsetWidth || 290;
-        // offsetLeft is relative to .projects-stack container
-        const slotCenter = slot.offsetLeft + slotWidth / 2;
-        const diff = slotCenter - scrollerCenter;
-        
-        // Normalize distance: 0 at center, -1 when scrolled left, 1 when entering from right
-        const gap = 20; // grid gap defined in CSS
-        const normalizedDiff = diff / (slotWidth + gap);
-        const absDiff = Math.abs(normalizedDiff);
-
-        // Active state trigger
-        const isActive = absDiff < 0.45;
-        slot.classList.toggle('active', isActive);
-        slot.style.pointerEvents = isActive ? 'auto' : 'none';
-
-        // Scale: grows to 1.05 at center, shrinks to 0.85 when away
-        const scale = 1.05 - Math.min(0.2, absDiff * 0.2);
-        
-        // Opacity: 1.0 at center, fades to 0.45 when away
-        const opacity = 1.0 - Math.min(0.55, absDiff * 0.6);
-
-        // 3D rotation, skew, and translation to create a stack/queue folding effect
-        const rotateY = normalizedDiff * -12; // tilt outwards
-        const skewX = normalizedDiff * -2;   // subtle skew
-        const translateX = normalizedDiff * -30; // pull closer for overlap/queue feel
-
-        slot.style.transform = `translate3d(${translateX}px, 0, 0) scale(${scale}) rotateY(${rotateY}deg) skewX(${skewX}deg)`;
-        slot.style.opacity = opacity;
-        
-        // Blur effect for off-center cards
-        if (absDiff > 0.1) {
-          const blurVal = Math.min(3.5, (absDiff - 0.1) * 4.5);
-          slot.style.filter = `blur(${blurVal}px)`;
-        } else {
-          slot.style.filter = 'none';
-        }
-      });
-    } else {
-      // Desktop 3D stack physics and transformations
-      currentProgress += (targetProgress - currentProgress) * 0.08;
+    if (!isMobile) {
       currentMouseX += (targetMouseX - currentMouseX) * 0.05;
       currentMouseY += (targetMouseY - currentMouseY) * 0.05;
 
-      const speed = 0.4 + Math.abs(targetProgress - currentProgress) * 25;
-      gridOffset = (gridOffset + speed) % 60;
-
-      const bounce = totalSlots > 1 ? Math.abs(Math.sin(currentProgress * Math.PI * (totalSlots - 1))) : 0;
+      const gridSpeed = 0.28 + progressDelta * 18;
+      gridOffset = (gridOffset + gridSpeed) % 60;
 
       if (bgCircles) {
-        bgCircles.style.transform = `rotate(${currentProgress * 80 + currentMouseX * 30}deg) translate3d(${currentMouseX * 35}px, ${currentMouseY * 35}px, 0) scale(${1 + bounce * 0.06})`;
+        bgCircles.style.transform = `rotate(${currentProgress * 48 + currentMouseX * 18}deg) translate3d(${currentMouseX * 22}px, ${currentMouseY * 22}px, 0)`;
       }
       if (bgGrid) {
-        bgGrid.style.transform = `perspective(600px) rotateX(${65 + currentMouseY * 12}deg) rotateY(${currentMouseX * 12}deg) translateY(${gridOffset}px)`;
+        bgGrid.style.transform = `perspective(600px) rotateX(${65 + currentMouseY * 8}deg) rotateY(${currentMouseX * 8}deg) translateY(${gridOffset}px)`;
       }
-
-      const activeIndex = totalSlots > 1 ? Math.round(currentProgress * (totalSlots - 1)) : 0;
-      if (projectsProgress) {
-        projectsProgress.style.transform = `scaleX(${Math.max(0.04, currentProgress)})`;
-      }
-
-      slots.forEach((slot, index) => {
-        const x = totalSlots > 1 ? index - currentProgress * (totalSlots - 1) : 0;
-        const absX = Math.abs(x);
-        slot.style.transform = `translate3d(${x * 125}%, ${absX * 20}px, 0) rotateY(${x * -18}deg) skewX(${x * -5}deg) scale(${1 - Math.min(absX * 0.08, 0.2)})`;
-        slot.style.opacity = Math.max(0, 1 - absX * 0.65);
-        slot.style.filter = absX > 0.1 ? `blur(${Math.min(absX * 2, 4)}px)` : 'none';
-        
-        const isActive = index === activeIndex;
-        slot.classList.toggle('active', isActive);
-        slot.style.pointerEvents = isActive ? 'auto' : 'none';
-      });
     }
 
     // Animate mouse follow glow orb
@@ -635,44 +691,236 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function initLabConsole() {
-    const chips = document.querySelectorAll('.lab-chip');
-    const text = document.getElementById('lab-console-text');
-    if (!chips.length || !text) return;
+  function initLabScroll() {
+    const track = document.getElementById('lab-scroll-track');
+    const textTrack = document.getElementById('lab-scroll-text-track');
+    const viewport = textTrack?.parentElement;
+    if (!track || !textTrack || !viewport) return;
 
-    const copy = {
-      ai: 'Training models to become useful products, not just impressive demos.',
-      web: 'Obsessing over motion, latency, layout, and the tiny details that make an interface feel inevitable.',
-      backend: 'Designing APIs, data flows, and services that stay calm when the frontend gets ambitious.',
-      product: 'Turning vague ideas into shippable loops: build, test, learn, tighten.'
-    };
+    const items = Array.from(textTrack.querySelectorAll('.lab-scroll-text-item'));
+    if (!items.length) return;
 
-    chips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        chips.forEach(item => item.classList.remove('active'));
-        chip.classList.add('active');
-        text.animate(
-          [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 260, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
-        );
-        text.textContent = copy[chip.dataset.lab] || copy.ai;
+    const totalItems = items.length;
+    const HOLD_VH = 0.42;
+    const TRANS_VH = 0.16;
+    const VIEWPORT_PAD = 16;
+    let labSnapTimer = null;
+    let itemOffsets = [0];
+    let targetIndex = 0;
+    let currentIndex = 0;
+    let displayOffset = 0;
+    let isLocked = true;
+
+    function easeInOutCubic(t) {
+      const x = Math.min(Math.max(t, 0), 1);
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+
+    function getScrollableVh() {
+      return totalItems * HOLD_VH + (totalItems - 1) * TRANS_VH;
+    }
+
+    function measureItems() {
+      itemOffsets = [0];
+      const heights = items.map((item) => {
+        item.style.height = 'auto';
+        return item.getBoundingClientRect().height;
       });
+
+      for (let i = 1; i < heights.length; i++) {
+        itemOffsets.push(itemOffsets[i - 1] + heights[i - 1]);
+      }
+
+      const maxHeight = Math.max(...heights, 1);
+      viewport.style.height = `${maxHeight + VIEWPORT_PAD}px`;
+      return maxHeight;
+    }
+
+    function scrolledToIndex(scrolledPx) {
+      const vh = window.innerHeight;
+      let cursorVh = 0;
+
+      for (let i = 0; i < totalItems; i++) {
+        if (scrolledPx / vh < cursorVh + HOLD_VH) {
+          return { index: i, locked: true };
+        }
+        cursorVh += HOLD_VH;
+
+        if (i < totalItems - 1) {
+          if (scrolledPx / vh < cursorVh + TRANS_VH) {
+            const t = easeInOutCubic((scrolledPx / vh - cursorVh) / TRANS_VH);
+            return { index: i + t, locked: false };
+          }
+          cursorVh += TRANS_VH;
+        }
+      }
+
+      return { index: totalItems - 1, locked: true };
+    }
+
+    function lockIndexToScrollPx(lockIndex) {
+      const vh = window.innerHeight;
+      let cursorVh = 0;
+
+      for (let i = 0; i < lockIndex; i++) {
+        cursorVh += HOLD_VH + TRANS_VH;
+      }
+      cursorVh += HOLD_VH * 0.5;
+      return cursorVh * vh;
+    }
+
+    function nearestLockIndex(scrolledPx) {
+      let nearest = 0;
+      let minDist = Infinity;
+
+      for (let i = 0; i < totalItems; i++) {
+        const dist = Math.abs(scrolledPx - lockIndexToScrollPx(i));
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = i;
+        }
+      }
+
+      return nearest;
+    }
+
+    function applyItemStates() {
+      const activeIndex = Math.min(Math.round(currentIndex), totalItems - 1);
+
+      items.forEach((item, i) => {
+        const isActive = i === activeIndex;
+        item.classList.toggle('is-active', isActive);
+        item.classList.toggle('is-locked', isActive && isLocked);
+        item.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+    }
+
+    function labRenderLoop() {
+      if (window.innerWidth > 768) {
+        const lerp = isLocked ? 0.14 : 0.1;
+        currentIndex += (targetIndex - currentIndex) * lerp;
+
+        if (Math.abs(targetIndex - currentIndex) < 0.001) {
+          currentIndex = targetIndex;
+        }
+
+        const activeIndex = Math.min(Math.round(currentIndex), totalItems - 1);
+        const targetOffset = itemOffsets[activeIndex] ?? 0;
+        displayOffset += (targetOffset - displayOffset) * lerp;
+
+        textTrack.style.transform = `translate3d(0, ${-displayOffset}px, 0)`;
+        applyItemStates();
+      }
+
+      requestAnimationFrame(labRenderLoop);
+    }
+
+    function setTrackHeight() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        track.style.height = 'auto';
+        viewport.style.height = 'auto';
+        textTrack.style.transform = '';
+        items.forEach((item, i) => {
+          item.classList.toggle('is-active', i === 0);
+          item.classList.remove('is-locked');
+        });
+        return;
+      }
+
+      measureItems();
+      track.style.height = `${window.innerHeight + getScrollableVh() * window.innerHeight}px`;
+      currentIndex = targetIndex;
+      displayOffset = itemOffsets[Math.min(Math.round(currentIndex), totalItems - 1)] ?? 0;
+      textTrack.style.transform = `translate3d(0, ${-displayOffset}px, 0)`;
+    }
+
+    function updateScrollText() {
+      if (window.innerWidth <= 768) return;
+
+      const rect = track.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      if (scrollable <= 0) return;
+
+      const scrolled = Math.min(Math.max(-rect.top, 0), scrollable);
+      const state = scrolledToIndex(scrolled);
+      targetIndex = state.index;
+      isLocked = state.locked;
+
+      clearTimeout(labSnapTimer);
+      if (rect.top <= 80 && rect.bottom >= window.innerHeight - 80) {
+        labSnapTimer = setTimeout(() => {
+          const snapIndex = nearestLockIndex(scrolled);
+          const snapOffset = lockIndexToScrollPx(snapIndex);
+          if (Math.abs(scrolled - snapOffset) < 24) return;
+
+          window.scrollTo({
+            top: window.scrollY + rect.top + snapOffset,
+            behavior: 'smooth'
+          });
+        }, 280);
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      setTrackHeight();
+      updateScrollText();
     });
+    window.addEventListener('scroll', updateScrollText, { passive: true });
+
+    setTrackHeight();
+    updateScrollText();
+    labRenderLoop();
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        setTrackHeight();
+        updateScrollText();
+      });
+    }
   }
 
   function initSignalPanel() {
     const panel = document.getElementById('signal-panel');
+    const ambient = document.getElementById('signal-ambient');
+    const dialFill = document.getElementById('signal-dial-fill');
+    const timeEl = document.getElementById('signal-time');
     if (!panel) return;
+
+    const DIAL_ARC = 367;
+
+    function updateTime() {
+      if (!timeEl) return;
+      timeEl.textContent = new Intl.DateTimeFormat('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Kolkata'
+      }).format(new Date());
+    }
+
+    updateTime();
+    setInterval(updateTime, 30000);
 
     panel.addEventListener('mousemove', (e) => {
       const rect = panel.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      panel.style.transform = `perspective(700px) rotateX(${y * -7}deg) rotateY(${x * 9}deg)`;
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const tiltX = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
+      const tiltY = ((e.clientX - rect.left) / rect.width - 0.5) * 5;
+
+      panel.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+      if (ambient) {
+        ambient.style.background = `radial-gradient(circle 150px at ${x}% ${y}%, rgba(255, 255, 255, 0.1), transparent 70%)`;
+      }
     });
 
     panel.addEventListener('mouseleave', () => {
       panel.style.transform = '';
+      if (ambient) {
+        ambient.style.background = '';
+      }
     });
 
     const counters = panel.querySelectorAll('[data-count-to]');
@@ -681,12 +929,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!entry.isIntersecting) return;
         counters.forEach(counter => {
           const target = Number(counter.dataset.countTo || 0);
+          const suffix = counter.dataset.suffix || '';
           const start = performance.now();
-          const duration = 1100;
+          const duration = 1400;
           function tick(now) {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            counter.textContent = Math.round(target * eased).toString();
+            const eased = 1 - Math.pow(1 - progress, 4);
+            const value = Math.round(target * eased);
+            counter.textContent = `${value}${suffix}`;
+
+            if (dialFill && counter.classList.contains('signal-dial-value')) {
+              dialFill.style.strokeDashoffset = String(DIAL_ARC * (1 - eased * (target / 100)));
+            }
+
             if (progress < 1) requestAnimationFrame(tick);
           }
           requestAnimationFrame(tick);
