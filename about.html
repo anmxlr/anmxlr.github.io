@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="anmxlr — personal landing page">
+    <title>know me</title>
+    <link rel="stylesheet" href="src/about.css">
+    <link rel="icon" type="image/svg+xml" href="src/assets/images/logo.svg" />
+    <link rel="shortcut icon" href="src/assets/images/logo.svg" />
+</head>
+
+<body>
+
+    <!-- ── Main Page ────────────────────────────────── -->
+    <div class="main-page" id="main-page">
+
+        <canvas class="constellation-canvas" id="constellation-canvas" aria-hidden="true"></canvas>
+
+        <!-- Top Navigation Bar -->
+        <nav class="top-bar" id="top-bar">
+            <div class="logo">
+                <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="logo-icon">
+                <span>anmxlr ™</span>
+            </div>
+
+            <a href="index.html" class="contact-btn" id="contact-btn">
+                <span>Back</span>
+                <svg class="arrow-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 7h12M8 2l5 5-5 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
+        </nav>
+
+        <!-- ── Hero Section ────────────────────────────── -->
+        <section class="about-hero" id="about-hero">
+            <div class="hero-animated-container">
+                <img id="animated-me" class="hero-animated-image" src="src/assets/images/about/anim-me.PNG"
+                    alt="Animated portrait">
+            </div>
+            <h1 class="about-hero-title">Hey, I'm Anmol Raj</h1>
+            <p class="about-hero-subtitle">A developer, designer, and digital creator. Let me tell you my story.</p>
+        </section>
+
+
+        <!-- ── My Journey Section ────────────────────────────– -->
+        <section class="about-content-section" id="journey-section">
+            <div class="section-header">
+                <div class="section-kicker">My Journey</div>
+                <h2 class="section-title">From Code to Creation</h2>
+                <p class="section-description">
+                    My journey has been shaped by curiosity, challenges, and countless learning experiences.
+                </p>
+            </div>
+            <div class="section-content journey-timeline">
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2020</div>
+                        <div class="card-title">Started Coding</div>
+                        <div class="card-description">
+                            Fell in love with web development and started building my first projects. Python and
+                            JavaScript became my languages of choice.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2021-2022</div>
+                        <div class="card-title">Full Stack Development</div>
+                        <div class="card-description">
+                            Dived deep into full-stack development, learning React, Node.js, and database design. Built
+                            several production projects.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">React</span>
+                            <span class="tag">Node.js</span>
+                            <span class="tag">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="timeline-item">
+                        <div class="card-label">2023-2024</div>
+                        <div class="card-title">Design & UI Focus</div>
+                        <div class="card-description">
+                            Started exploring design systems, animations, and creating beautiful user experiences.
+                            Merged creativity with engineering.
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">UI/UX</span>
+                            <span class="tag">Animations</span>
+                            <span class="tag">Design Systems</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── My Hobbies Section ────────────────────────────– -->
+        <section class="about-content-section" id="hobbies-section">
+            <div class="section-header">
+                <div class="section-kicker">My Hobbies</div>
+                <h2 class="section-title">When I'm Not Coding</h2>
+                <p class="section-description">
+                    These are the things that keep me creative and energized outside of work.
+                </p>
+            </div>
+            <div class="section-content hobbies-grid">
+                <div class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-label">Travelling</div>
+                            <div class="card-title">Exploring new places</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        I love exploring new places be it solo or with friends.
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-label">Music</div>
+                            <div class="card-title">Sound & Vibes</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Music production and exploring different genres. Synths, lo-fi, and hip-hop are my current
+                        favorites.
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-label">Reading</div>
+                            <div class="card-title">Knowledge Seeker</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Philosophy, sci-fi, and design books fuel my imagination. Currently reading about creative
+                        systems and human psychology.
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-label">Digital Art</div>
+                            <div class="card-title">Creative Expression</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Experimenting with digital painting and generative art. Love the intersection of code and visual
+                        creativity.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Sidequests Section ────────────────────────────– -->
+        <section class="about-content-section" id="sidequests-section">
+            <div class="section-header">
+                <div class="section-kicker">Sidequests</div>
+                <h2 class="section-title">Fun Projects & Experiments</h2>
+                <p class="section-description">
+                    Beyond my main work, I pursue passion projects and experimental ideas.
+                </p>
+            </div>
+            <div class="section-content sidequests-grid">
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-icon">🛠️</div>
+                        <div>
+                            <div class="card-label">Open Source</div>
+                            <div class="card-title">Contributing</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Active contributor to open-source projects. Believe in building tools that help the developer
+                        community.
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">GitHub</span>
+                        <span class="tag">Documentation</span>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-icon">📝</div>
+                        <div>
+                            <div class="card-label">Writing</div>
+                            <div class="card-title">Tech Articles</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Writing about web development, design, and creative coding. Sharing knowledge and experiences.
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">Blog</span>
+                        <span class="tag">Tutorials</span>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <div>
+                            <div class="card-label">Experiments</div>
+                            <div class="card-title">Pushing Limits</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Testing new technologies and frameworks. WebGL, AI integration, and browser APIs are my current
+                        playgrounds.
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">WebGL</span>
+                        <span class="tag">Cutting Edge</span>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-icon">🎓</div>
+                        <div>
+                            <div class="card-label">Learning</div>
+                            <div class="card-title">Always Growing</div>
+                        </div>
+                    </div>
+                    <div class="card-description">
+                        Exploring new skills like 3D modeling, AI/ML, and advanced animation techniques to expand my
+                        toolkit.
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">3D</span>
+                        <span class="tag">ML</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Currently Doing Section ────────────────────────────– -->
+        <section class="about-content-section" id="currently-section">
+            <div class="section-header">
+                <div class="section-kicker">Currently Doing</div>
+                <h2 class="section-title">What's on My Plate</h2>
+                <p class="section-description">
+                    Here's what I'm actively working on and excited about right now.
+                </p>
+            </div>
+            <div class="section-content currently-doing-items">
+                <div class="doing-item">
+                    <div class="doing-item-title">Building a Design System</div>
+                    <div class="doing-item-subtitle">React Components Library</div>
+                    <div class="doing-item-description">
+                        Creating a comprehensive, reusable component library with proper documentation and accessibility
+                        features.
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+                <div class="doing-item">
+                    <div class="doing-item-title">Learning 3D with Three.js</div>
+                    <div class="doing-item-subtitle">Web Graphics Exploration</div>
+                    <div class="doing-item-description">
+                        Diving into 3D web graphics and creating immersive interactive experiences for the web.
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 45%;"></div>
+                    </div>
+                </div>
+                <div class="doing-item">
+                    <div class="doing-item-title">AI Integration Projects</div>
+                    <div class="doing-item-subtitle">Exploring New Possibilities</div>
+                    <div class="doing-item-description">
+                        Experimenting with LLMs and AI models to build intelligent, helpful applications.
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 50%;"></div>
+                    </div>
+                </div>
+                <div class="doing-item">
+                    <div class="doing-item-title">Personal Brand Building</div>
+                    <div class="doing-item-subtitle">Content & Community</div>
+                    <div class="doing-item-description">
+                        Creating content, engaging with the developer community, and building a strong personal
+                        presence.
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 55%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reach Out Section -->
+        <section class="reach-section" id="reach-section">
+            <div class="section-kicker">Reach Out</div>
+            <h2 class="reach-title">Send me a clean brief.</h2>
+            <form class="reach-form" id="reach-form">
+                <div class="reach-field">
+                    <label for="reach-name">Name</label>
+                    <input id="reach-name" name="name" autocomplete="name" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-location">Location</label>
+                    <input id="reach-location" name="location" autocomplete="address-level2">
+                </div>
+                <div class="reach-field">
+                    <label for="reach-building">What you are building</label>
+                    <input id="reach-building" name="building" required>
+                </div>
+                <div class="reach-field">
+                    <label for="reach-email">Email ID</label>
+                    <input id="reach-email" name="email" type="email" autocomplete="email" required>
+                </div>
+                <div class="reach-field reach-field-full">
+                    <label for="reach-message">Message for me</label>
+                    <textarea id="reach-message" name="message" rows="5" required></textarea>
+                </div>
+                <button class="reach-send" type="submit">Send message</button>
+            </form>
+        </section>
+
+        <!-- ── Footer ─────────────────────────────── -->
+        <footer class="footer" id="footer">
+            <div class="footer-divider"></div>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo-container">
+                        <img src="src/assets/images/logo.svg" alt="anmxlr Logo" class="footer-logo-img">
+                        <span class="footer-logo">anmxlr ™</span>
+                    </div>
+                    <p class="footer-copyright">© 2026 Anmol Raj. All rights reserved.</p>
+                </div>
+                <div class="footer-right">
+                    <span class="footer-heading">contact</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Film grain texture overlay -->
+        <div class="grain"></div>
+    </div>
+
+    <script src="src/about.js"></script>
+</body>
+
+</html>

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Tap Sound on Interactive Elements ──────────────
   window.addEventListener('click', (e) => {
-    const hit = e.target.closest('a, button, input[type="submit"], input[type="button"], .logo, [role="button"], project-card, .connect-btn, .signal-panel, .chip');
+    const hit = e.target.closest('a, button, input[type="submit"], input[type="button"], .logo, [role="button"], project-card, .connect-btn, .status-card, .chip');
     if (hit) {
       playTap(0.35);
     }
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Custom cursor click & hover triggers (event delegation)
     window.addEventListener('mouseover', (e) => {
-      const isInteractive = e.target.closest('a, button, input, project-card, .logo, [role="button"], #name-warp-canvas, .connect-btn, .signal-panel');
+      const isInteractive = e.target.closest('a, button, input, project-card, .logo, [role="button"], #name-warp-canvas, .connect-btn, .status-card');
       document.documentElement.classList.toggle('cursor-hover', !!isInteractive);
     });
     window.addEventListener('mousedown', () => document.documentElement.classList.add('cursor-click'));
@@ -329,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initConstellation();
   initLabScroll();
   initHiddenTerminal();
-  initSignalPanel();
   initEasterEggs();
   initPhonePuzzle();
   initReachForm();
@@ -880,77 +879,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function initSignalPanel() {
-    const panel = document.getElementById('signal-panel');
-    const ambient = document.getElementById('signal-ambient');
-    const dialFill = document.getElementById('signal-dial-fill');
-    const timeEl = document.getElementById('signal-time');
-    if (!panel) return;
-
-    const DIAL_ARC = 367;
-
-    function updateTime() {
-      if (!timeEl) return;
-      timeEl.textContent = new Intl.DateTimeFormat('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: 'Asia/Kolkata'
-      }).format(new Date());
-    }
-
-    updateTime();
-    setInterval(updateTime, 30000);
-
-    panel.addEventListener('mousemove', (e) => {
-      const rect = panel.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      const tiltX = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
-      const tiltY = ((e.clientX - rect.left) / rect.width - 0.5) * 5;
-
-      panel.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-
-      if (ambient) {
-        ambient.style.background = `radial-gradient(circle 150px at ${x}% ${y}%, rgba(255, 255, 255, 0.1), transparent 70%)`;
-      }
-    });
-
-    panel.addEventListener('mouseleave', () => {
-      panel.style.transform = '';
-      if (ambient) {
-        ambient.style.background = '';
-      }
-    });
-
-    const counters = panel.querySelectorAll('[data-count-to]');
-    const counterObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        counters.forEach(counter => {
-          const target = Number(counter.dataset.countTo || 0);
-          const suffix = counter.dataset.suffix || '';
-          const start = performance.now();
-          const duration = 1400;
-          function tick(now) {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 4);
-            const value = Math.round(target * eased);
-            counter.textContent = `${value}${suffix}`;
-
-            if (dialFill && counter.classList.contains('signal-dial-value')) {
-              dialFill.style.strokeDashoffset = String(DIAL_ARC * (1 - eased * (target / 100)));
-            }
-
-            if (progress < 1) requestAnimationFrame(tick);
-          }
-          requestAnimationFrame(tick);
-        });
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.35 });
-    counterObserver.observe(panel);
-  }
 
   function initHiddenTerminal() {
     const overlay = document.getElementById('terminal-overlay');

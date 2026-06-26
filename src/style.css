@@ -1871,281 +1871,141 @@ project-card {
   color: #000000;
 }
 
-.signal-panel {
+.status-card {
   position: relative;
-  min-height: 420px;
-  padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 20px;
-  background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.045) 0%, transparent 42%),
-    rgba(6, 6, 6, 0.88);
+  min-height: 380px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.45s ease, box-shadow 0.45s ease;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.signal-panel::before {
-  content: '';
+.status-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.status-card-glow {
   position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
   pointer-events: none;
-}
-
-.signal-panel:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 28px 70px rgba(0, 0, 0, 0.55);
-}
-
-.signal-ambient {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle 140px at 50% 40%, rgba(255, 255, 255, 0.09), transparent 68%);
   opacity: 0;
   transition: opacity 0.5s ease;
-  pointer-events: none;
 }
 
-.signal-panel:hover .signal-ambient {
+.status-card:hover .status-card-glow {
   opacity: 1;
 }
 
-.signal-panel-inner {
+.status-card-inner {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
   height: 100%;
-  min-height: 390px;
 }
 
-.signal-panel-header {
+.status-card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.signal-panel-title {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.signal-brand {
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-
-.signal-sub {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.34);
-}
-
-.signal-status {
-  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.status-avatar {
   position: relative;
-  padding-top: 2px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.signal-status-dot {
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
-  animation: signalStatusBreath 3.2s ease-in-out infinite;
-}
-
-@keyframes signalStatusBreath {
-
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: scale(0.9);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.signal-status::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.35);
-  transform: scaleX(0.35);
-  transform-origin: left center;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.signal-panel:hover .signal-status::after {
-  transform: scaleX(1);
-}
-
-.signal-dial {
-  position: relative;
-  width: min(100%, 240px);
-  margin: 2rem auto 1.75rem;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-}
-
-.signal-dial-svg {
-  width: 100%;
-  height: 100%;
-}
-
-.signal-dial-inner {
-  stroke: rgba(255, 255, 255, 0.04);
-  stroke-width: 1;
-}
-
-.signal-dial-track {
-  stroke: rgba(255, 255, 255, 0.09);
-  stroke-width: 1;
-  stroke-dasharray: 367 490;
-  stroke-linecap: round;
-}
-
-.signal-dial-fill {
-  stroke: #ffffff;
-  stroke-width: 1.5;
-  stroke-dasharray: 367 490;
-  stroke-dashoffset: 367;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.signal-dial-ticks line {
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1;
-  stroke-linecap: round;
-}
-
-.signal-dial-core {
-  position: absolute;
-  inset: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  text-align: center;
-  padding-top: 8px;
+  overflow: hidden;
 }
 
-.signal-dial-value {
-  font-size: clamp(2.6rem, 9vw, 3.6rem);
-  font-weight: 300;
-  letter-spacing: -0.03em;
+.status-avatar-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: invert(1);
 }
 
-.signal-metrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  align-items: stretch;
-  position: relative;
-  margin-top: auto;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.signal-metrics::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 1.5rem;
-  bottom: 0;
-  width: 1px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.14), transparent);
-}
-
-.signal-metric {
+.status-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 0 1rem;
+  gap: 4px;
 }
 
-.signal-metric:first-child {
-  padding-left: 0;
-}
-
-.signal-metric:last-child {
-  padding-right: 0;
-  text-align: right;
-}
-
-.signal-metric .readout-value {
-  font-size: clamp(1.5rem, 5vw, 2rem);
-  font-weight: 300;
-  letter-spacing: -0.03em;
-}
-
-.readout-value {
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -0.03em;
+.status-name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: #ffffff;
-  font-variant-numeric: tabular-nums;
 }
 
-.readout-label {
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.36);
+.status-role {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.01em;
 }
 
-.signal-foot {
+.status-metrics {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1.35rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
 }
 
-.signal-foot-time {
-  font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.48);
+.hero-animated-container {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-animated-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 16px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-animated-image:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.15));
+}
+
+.status-tagline {
+  margin-top: auto;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.tagline-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
 }
 
 /* Lab scroll track */
@@ -2638,35 +2498,44 @@ project-card {
     line-height: 1.05;
   }
 
-  .lab-scroll-text-viewport {
-    height: auto;
-    overflow: visible;
-    padding: 0;
+
+  .status-card {
+    min-height: 340px;
+    padding: 1.5rem;
   }
 
-  .lab-scroll-text-track {
-    gap: 0.15rem;
+  .status-card-header {
+    gap: 1rem;
   }
 
-  .lab-scroll-text-item {
-    height: auto;
-    color: #ffffff;
-    opacity: 1;
-    visibility: visible;
+  .status-avatar {
+    width: 56px;
+    height: 56px;
   }
 
-  .signal-panel {
-    min-height: 380px;
-    padding: 1.25rem;
+  .status-avatar-img {
+    width: 32px;
+    height: 32px;
   }
 
-  .signal-panel-inner {
-    min-height: 350px;
+  .status-name {
+    font-size: 1.1rem;
   }
 
-  .signal-dial {
-    width: min(100%, 200px);
-    margin-top: 1.5rem;
+  .status-role {
+    font-size: 0.75rem;
+  }
+
+  .hero-animated-container {
+    max-width: 220px;
+  }
+
+  .status-tagline {
+    padding: 1rem;
+  }
+
+  .tagline-text {
+    font-size: 0.8rem;
   }
 
   .lab-console-text {

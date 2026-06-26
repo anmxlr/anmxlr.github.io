@@ -1011,8 +1011,8 @@ function startAboutPage() {
       { name: 'Iron Pickaxe', power: 4 },
       { name: 'Golden Pickaxe', power: 8 },
       { name: 'Diamond Pickaxe', power: 16 },
-      { name: 'Netherite Pickaxe', power: 50 },
-      { name: 'Netherite Pickaxe', power: 50 } // Tier 6 retains Netherite power
+      { name: 'Netherite Pickaxe', power: 30 },
+      { name: 'Enchanted Netherite Pickaxe', power: 50 } // Tier 6 retains Netherite power
     ];
     
     const upgradeCosts = [
@@ -2055,8 +2055,8 @@ function startAboutPage() {
           const dy = targetChaseY - (enderman.y + enderman.height / 2);
           const len = Math.sqrt(dx * dx + dy * dy);
           if (len > 5) {
-            const vx = (dx / len) * 1.2;
-            const vy = (dy / len) * 1.2;
+            const vx = (dx / len) * 1.8;
+            const vy = (dy / len) * 1.8;
             moveMob(enderman, vx, vy, consoleRect);
           }
           enderman.wanderWaitUntil = 0;
