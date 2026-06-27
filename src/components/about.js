@@ -204,7 +204,7 @@ function startAboutPage() {
         cursorEl.classList.remove('hovering');
       } else {
         cursorEl.classList.remove('mc-custom-cursor');
-        const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link, .decor-image');
+        const hit = e.target.closest('a, button, input, textarea, .logo, [role="button"], .content-card, .doing-item, .tag, .sidequest-item, .plate-item, .post-link, .decor-image, .stack-photo, .photo-stack-close');
         cursorEl.classList.toggle('hovering', !!hit);
       }
     });
@@ -276,6 +276,9 @@ function startAboutPage() {
   document.querySelectorAll('.collage-item').forEach(item => {
     item.addEventListener('click', () => playTap(0.25));
   });
+
+  // Travel and wildlife photo stacks
+  initPhotoStacks(playTap);
 
   // Form submit button
   const reachSend = document.querySelector('.reach-send');
@@ -2130,6 +2133,73 @@ function startAboutPage() {
     updateUI();
     spawnNewBlock();
   }
+}
+
+function initPhotoStacks(playTap) {
+  const stacks = document.querySelectorAll('[data-photo-stack]');
+  if (!stacks.length) return;
+
+  const closeStack = (stack) => {
+    if (!stack?.classList.contains('is-exploded')) return;
+    stack.classList.remove('is-exploded');
+    stack.querySelectorAll('.stack-photo').forEach(photo => {
+      photo.classList.remove('is-selected');
+      photo.setAttribute('aria-pressed', 'false');
+    });
+  };
+
+  const openStack = (stack, selectedPhoto) => {
+    stacks.forEach(otherStack => {
+      if (otherStack !== stack) closeStack(otherStack);
+    });
+
+    stack.classList.add('is-exploded');
+    stack.querySelectorAll('.stack-photo').forEach(photo => {
+      const isSelected = photo === selectedPhoto;
+      photo.classList.toggle('is-selected', isSelected);
+      photo.setAttribute('aria-pressed', String(isSelected));
+    });
+  };
+
+  stacks.forEach(stack => {
+    const photos = stack.querySelectorAll('.stack-photo');
+    const closeButton = stack.querySelector('.photo-stack-close');
+
+    photos.forEach(photo => {
+      photo.setAttribute('aria-pressed', 'false');
+      photo.addEventListener('click', (event) => {
+        event.stopPropagation();
+        playTap?.(0.28);
+
+        if (!stack.classList.contains('is-exploded')) {
+          openStack(stack, photo);
+          return;
+        }
+
+        photos.forEach(otherPhoto => {
+          const isSelected = otherPhoto === photo;
+          otherPhoto.classList.toggle('is-selected', isSelected);
+          otherPhoto.setAttribute('aria-pressed', String(isSelected));
+        });
+      });
+    });
+
+    closeButton?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      playTap?.(0.32);
+      closeStack(stack);
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-photo-stack]')) return;
+    stacks.forEach(closeStack);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    stacks.forEach(closeStack);
+  });
 }
 
 if (document.readyState === 'loading') {

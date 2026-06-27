@@ -140,50 +140,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Hero Title Word Animation ─────────────────────
   function startHeroAnimation() {
+    const heroTitle = document.querySelector('.hero-title');
+    const titleIntro = document.querySelector('.hero-title-intro');
     const wrapper = document.querySelector('.change-wrapper');
     const strike = document.querySelector('.word-strike');
-    const pop = document.querySelector('.word-pop');
-    if (!wrapper || !strike || !pop) return;
+    const typewriterText = document.querySelector('.typewriter-text');
+    if (!wrapper || !strike) return;
+    const finalTitle = 'make something cool';
 
-    wrapper.style.width = `${strike.offsetWidth}px`;
-    setTimeout(() => wrapper.classList.add('cut'), 1200);
-    setTimeout(() => {
-      wrapper.classList.add('split');
+    function fitFinalTitle() {
+      if (!heroTitle) return;
 
-      const targetWord = "cool";
-
-      // Dynamic measurement of target word width
+      wrapper.style.removeProperty('--rewrite-font-size');
       const tempSpan = document.createElement('span');
       tempSpan.style.visibility = 'hidden';
       tempSpan.style.position = 'absolute';
       tempSpan.style.whiteSpace = 'nowrap';
-      tempSpan.style.font = window.getComputedStyle(pop).font;
-      tempSpan.textContent = targetWord;
+      tempSpan.style.font = window.getComputedStyle(wrapper).font;
+      tempSpan.textContent = finalTitle;
       document.body.appendChild(tempSpan);
 
-      // Let's add extra width for the cursor block (4px width + 4px margin)
-      const targetWidth = tempSpan.offsetWidth + 8;
+      const availableWidth = Math.max(heroTitle.clientWidth - 16, 1);
+      const measuredWidth = tempSpan.offsetWidth;
+      const scale = Math.min(1, availableWidth / Math.max(measuredWidth, 1));
       document.body.removeChild(tempSpan);
 
-      wrapper.style.width = `${targetWidth}px`;
-    }, 1500);
+      wrapper.style.setProperty('--rewrite-font-size', `${scale.toFixed(3)}em`);
+      wrapper.style.width = `${Math.ceil(measuredWidth * scale) + 8}px`;
+
+      if (typewriterText?.textContent) {
+        const currentSpan = document.createElement('span');
+        currentSpan.style.visibility = 'hidden';
+        currentSpan.style.position = 'absolute';
+        currentSpan.style.whiteSpace = 'nowrap';
+        currentSpan.style.font = window.getComputedStyle(wrapper).font;
+        currentSpan.textContent = typewriterText.textContent;
+        document.body.appendChild(currentSpan);
+        wrapper.style.setProperty('--typewriter-width', `${currentSpan.offsetWidth}px`);
+        document.body.removeChild(currentSpan);
+      }
+    }
+
+    if (typewriterText) typewriterText.textContent = '';
+    wrapper.style.setProperty('--typewriter-width', '0px');
+    wrapper.style.width = `${strike.offsetWidth}px`;
+    setTimeout(() => wrapper.classList.add('cut'), 1200);
+    setTimeout(() => {
+      if (heroTitle) heroTitle.classList.add('rewriting');
+      if (titleIntro) titleIntro.hidden = true;
+      wrapper.classList.add('split');
+      fitFinalTitle();
+    }, 1800);
 
     setTimeout(() => {
       wrapper.classList.add('pop');
-      typewriterEffect(pop.querySelector('.typewriter-text'), 'cool');
-    }, 1750);
+      typewriterEffect(wrapper, typewriterText, finalTitle);
+    }, 2050);
+
+    window.addEventListener('resize', () => {
+      if (heroTitle?.classList.contains('rewriting')) fitFinalTitle();
+    }, { passive: true });
   }
 
-  function typewriterEffect(element, text) {
-    if (!element) return;
-    element.textContent = '';
+  function typewriterEffect(wrapper, target, text) {
+    if (!wrapper || !target) return;
     let index = 0;
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.whiteSpace = 'nowrap';
+    tempSpan.style.font = window.getComputedStyle(wrapper).font;
+    document.body.appendChild(tempSpan);
 
     function type() {
       if (index < text.length) {
-        element.textContent += text.charAt(index);
         index++;
-        setTimeout(type, 180 + Math.random() * 120);
+        const currentText = text.slice(0, index);
+        target.textContent = currentText;
+        tempSpan.textContent = currentText;
+        wrapper.style.setProperty('--typewriter-width', `${tempSpan.offsetWidth}px`);
+        setTimeout(type, 50 + Math.random() * 40);
+      } else {
+        document.body.removeChild(tempSpan);
       }
     }
 
@@ -265,12 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyDesktopStackSlots(fractionalIndex, slotCount) {
     if (!slots.length || slotCount <= 0) return;
     const activeIndex = slotCount > 1 ? fractionalIndex * (slotCount - 1) : 0;
+    const isMobileView = window.innerWidth <= 768;
 
     slots.forEach((slot, index) => {
-      const x = slotCount > 1 ? index - activeIndex : 0;
-      const absX = Math.abs(x);
+      const offset = slotCount > 1 ? index - activeIndex : 0;
+      const absOffset = Math.abs(offset);
 
-      if (absX > 1.25) {
+      if (offset < -1.35 || offset > 2.35) {
         slot.style.opacity = '0';
         slot.style.visibility = 'hidden';
         slot.style.pointerEvents = 'none';
@@ -280,49 +319,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       slot.style.visibility = 'visible';
-      const isActive = absX < 0.28;
+      const isActive = absOffset < 0.34;
       slot.classList.toggle('active', isActive);
       slot.style.pointerEvents = isActive ? 'auto' : 'none';
 
-      const scale = 1 - Math.min(absX * 0.05, 0.11);
-      const translateY = x * -18;
-      const translateZ = -absX * 64;
-      const rotateY = Math.max(-7, Math.min(7, x * -4.5));
-      const opacity = absX < 0.06 ? 1 : Math.max(0, 0.95 - absX * 0.78);
+      const incoming = Math.max(offset, 0);
+      const outgoing = Math.max(-offset, 0);
+      const smoothOffset = Math.sign(offset) * easeInOutCubic(Math.min(absOffset, 1));
+      const smoothIncoming = Math.max(smoothOffset, 0);
+      const smoothOutgoing = Math.max(-smoothOffset, 0);
+      const incomingTravel = isMobileView ? 132 : 210;
+      const outgoingTravel = isMobileView ? 110 : 170;
+      const translateX = smoothIncoming * incomingTravel - smoothOutgoing * outgoingTravel;
+      const translateY = smoothIncoming * 14 + smoothOutgoing * 10;
+      const translateZ = -Math.min(absOffset * (isMobileView ? 58 : 82), isMobileView ? 118 : 170);
+      const rotateY = Math.max(-8, Math.min(10, smoothIncoming * -6 + smoothOutgoing * 4));
+      const rotateZ = Math.max(-3, Math.min(3, smoothIncoming * 2 - smoothOutgoing * 2.5));
+      const scale = 1 - Math.min(absOffset * (isMobileView ? 0.055 : 0.065), isMobileView ? 0.12 : 0.16);
+      const opacityFalloff = incoming * (isMobileView ? 0.3 : 0.34) + outgoing * (isMobileView ? 0.62 : 0.72);
+      const opacity = absOffset < 0.42 ? 1 : Math.max(0, 1 - opacityFalloff);
 
-      slot.style.zIndex = String(100 - Math.round(absX * 10));
-      slot.style.transform = `translate3d(0, ${translateY}px, ${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
+      slot.style.zIndex = String(100 - Math.round(absOffset * 12) + (offset > 0 ? 0 : -6));
+      slot.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg) scale(${scale})`;
       slot.style.opacity = String(opacity);
-      slot.style.filter = absX > 0.5 ? `blur(${Math.min((absX - 0.5) * 2.8, 2)}px)` : 'none';
-    });
-  }
-
-  function applyMobileStackSlots() {
-    if (!projectsScroller || !slots.length) return;
-    const scrollerWidth = projectsScroller.clientWidth;
-    const scrollerCenter = projectsScroller.scrollLeft + scrollerWidth / 2;
-
-    slots.forEach((slot) => {
-      const slotWidth = slot.offsetWidth || 290;
-      const slotCenter = slot.offsetLeft + slotWidth / 2;
-      const diff = slotCenter - scrollerCenter;
-      const gap = 20;
-      const normalizedDiff = diff / (slotWidth + gap);
-      const absDiff = Math.abs(normalizedDiff);
-
-      const isActive = absDiff < 0.38;
-      slot.classList.toggle('active', isActive);
-      slot.style.pointerEvents = isActive ? 'auto' : 'none';
-      slot.style.visibility = absDiff > 1.1 ? 'hidden' : 'visible';
-
-      const scale = 1 - Math.min(0.1, absDiff * 0.12);
-      const opacity = absDiff < 0.08 ? 1 : Math.max(0, 0.96 - absDiff * 0.7);
-      const rotateY = normalizedDiff * -5;
-      const translateX = normalizedDiff * -14;
-
-      slot.style.transform = `translate3d(${translateX}px, 0, 0) scale(${scale}) rotateY(${rotateY}deg)`;
-      slot.style.opacity = String(opacity);
-      slot.style.filter = absDiff > 0.35 ? `blur(${Math.min((absDiff - 0.35) * 2.5, 2)}px)` : 'none';
+      slot.style.filter = absOffset > 0.7 ? `blur(${Math.min((absOffset - 0.7) * 2, 1.4)}px)` : 'none';
     });
   }
 
@@ -415,14 +435,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Dynamic track height for desktop scroll-pinning (e.g. 100vh per project)
+    // Dynamic track height for scroll-pinning across screen sizes.
     function handleResize() {
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
+      if (window.innerWidth <= 768) {
         projectsTrack.style.height = 'auto';
-      } else {
-        projectsTrack.style.height = `${window.innerHeight + getProjectsScrollableVh(totalSlots) * window.innerHeight}px`;
+        return;
       }
+
+      projectsTrack.style.height = `${window.innerHeight + getProjectsScrollableVh(totalSlots) * window.innerHeight}px`;
     }
     window.addEventListener('resize', handleResize);
     handleResize();
@@ -451,8 +471,31 @@ document.addEventListener('DOMContentLoaded', () => {
     slots = document.querySelectorAll('.stack-slot');
 
     let pageSnapTimer = null;
+    let isDraggingProgress = false;
 
-    // Desktop Page Scroll (Sticky Pinning) logic
+    function scrollToProjectProgress(progress, behavior = 'auto') {
+      const clampedProgress = Math.min(Math.max(progress, 0), 1);
+      targetProgress = clampedProgress;
+      if (window.innerWidth <= 768) return;
+
+      const scrollable = projectsTrack.offsetHeight - window.innerHeight;
+      window.scrollTo({
+        top: projectsTrack.offsetTop + scrollable * clampedProgress,
+        behavior
+      });
+    }
+
+    function setProgressFromClientX(clientX, behavior = 'auto') {
+      const progressTrack = projectsProgress?.parentElement;
+      if (!progressTrack) return;
+
+      const rect = progressTrack.getBoundingClientRect();
+      const progress = rect.width > 0 ? (clientX - rect.left) / rect.width : 0;
+      targetProgress = Math.min(Math.max(progress, 0), 1);
+      scrollToProjectProgress(targetProgress, behavior);
+    }
+
+    // Page Scroll (Sticky Pinning) logic
     window.addEventListener('scroll', () => {
       if (window.innerWidth <= 768) return;
 
@@ -464,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
       targetProgress = scrolledToProjectProgress(scrolled, totalSlots);
 
       clearTimeout(pageSnapTimer);
-      if (trackRect.top <= 80 && trackRect.bottom >= window.innerHeight - 80 && totalSlots > 1) {
+      if (!isDraggingProgress && trackRect.top <= 80 && trackRect.bottom >= window.innerHeight - 80 && totalSlots > 1) {
         pageSnapTimer = setTimeout(() => {
           const snapIndex = Math.round(targetProgress * (totalSlots - 1));
           const snapOffset = lockIndexToProjectScrollPx(snapIndex, totalSlots);
@@ -478,13 +521,90 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { passive: true });
 
-    // Mobile Horizontal Scroll logic
-    projectsScroller.addEventListener('scroll', () => {
-      if (window.innerWidth > 768) return; // Handled by page scroll on desktop
+    const progressTrack = projectsProgress?.parentElement;
+    if (progressTrack) {
+      progressTrack.addEventListener('pointerdown', (event) => {
+        isDraggingProgress = true;
+        progressTrack.setPointerCapture?.(event.pointerId);
+        progressTrack.classList.add('is-dragging');
+        setProgressFromClientX(event.clientX);
+      });
 
-      const maxScroll = projectsScroller.scrollWidth - projectsScroller.clientWidth;
-      targetProgress = maxScroll > 0 ? projectsScroller.scrollLeft / maxScroll : 0;
-    }, { passive: true });
+      progressTrack.addEventListener('pointermove', (event) => {
+        if (!isDraggingProgress) return;
+        setProgressFromClientX(event.clientX);
+      });
+
+      const stopProgressDrag = (event) => {
+        if (!isDraggingProgress) return;
+        isDraggingProgress = false;
+        progressTrack.releasePointerCapture?.(event.pointerId);
+        progressTrack.classList.remove('is-dragging');
+        setProgressFromClientX(event.clientX, 'smooth');
+      };
+
+      progressTrack.addEventListener('pointerup', stopProgressDrag);
+      progressTrack.addEventListener('pointercancel', stopProgressDrag);
+      progressTrack.addEventListener('lostpointercapture', () => {
+        isDraggingProgress = false;
+        progressTrack.classList.remove('is-dragging');
+      });
+    }
+
+    if (projectsScroller) {
+      let swipeStartX = 0;
+      let swipeStartY = 0;
+      let swipeStartProgress = 0;
+      let isSwipingProjects = false;
+
+      projectsScroller.addEventListener('pointerdown', (event) => {
+        if (window.innerWidth > 768 || event.target.closest('a, button')) return;
+        isSwipingProjects = true;
+        swipeStartX = event.clientX;
+        swipeStartY = event.clientY;
+        swipeStartProgress = targetProgress;
+        projectsScroller.setPointerCapture?.(event.pointerId);
+        projectsScroller.classList.add('is-swiping');
+      });
+
+      projectsScroller.addEventListener('pointermove', (event) => {
+        if (!isSwipingProjects || window.innerWidth > 768 || totalSlots <= 1) return;
+
+        const deltaX = event.clientX - swipeStartX;
+        const deltaY = event.clientY - swipeStartY;
+        if (Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+        event.preventDefault();
+        const dragProgress = -deltaX / Math.max(projectsScroller.clientWidth, 1) / (totalSlots - 1);
+        targetProgress = Math.min(Math.max(swipeStartProgress + dragProgress, 0), 1);
+      });
+
+      const stopProjectSwipe = (event) => {
+        if (!isSwipingProjects) return;
+
+        const deltaX = event.clientX - swipeStartX;
+        const activeIndex = Math.round(targetProgress * (totalSlots - 1));
+        const swipeThreshold = Math.min(90, Math.max(42, projectsScroller.clientWidth * 0.16));
+        let nextIndex = activeIndex;
+
+        if (Math.abs(deltaX) > swipeThreshold) {
+          nextIndex = deltaX < 0 ? Math.ceil(swipeStartProgress * (totalSlots - 1)) + 1 : Math.floor(swipeStartProgress * (totalSlots - 1)) - 1;
+        }
+
+        nextIndex = Math.min(Math.max(nextIndex, 0), totalSlots - 1);
+        targetProgress = totalSlots > 1 ? nextIndex / (totalSlots - 1) : 0;
+        isSwipingProjects = false;
+        projectsScroller.releasePointerCapture?.(event.pointerId);
+        projectsScroller.classList.remove('is-swiping');
+      };
+
+      projectsScroller.addEventListener('pointerup', stopProjectSwipe);
+      projectsScroller.addEventListener('pointercancel', stopProjectSwipe);
+      projectsScroller.addEventListener('lostpointercapture', () => {
+        isSwipingProjects = false;
+        projectsScroller.classList.remove('is-swiping');
+      });
+    }
 
     // Start render loop
     renderLoop();
@@ -497,7 +617,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderLoop() {
     const isMobile = window.innerWidth <= 768;
     const progressDelta = Math.abs(targetProgress - currentProgress);
-    const progressLerp = progressDelta > 0.01 ? 0.14 : 0.1;
+    const progressLerp = isMobile
+      ? (progressDelta > 0.01 ? 0.12 : 0.08)
+      : (progressDelta > 0.01 ? 0.13 : 0.085);
 
     currentProgress += (targetProgress - currentProgress) * progressLerp;
 
@@ -506,11 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (slots.length && totalSlots > 0) {
-      if (isMobile) {
-        applyMobileStackSlots();
-      } else {
-        applyDesktopStackSlots(currentProgress, totalSlots);
-      }
+      applyDesktopStackSlots(currentProgress, totalSlots);
     }
 
     if (!isMobile) {
@@ -795,38 +913,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function labRenderLoop() {
-      if (window.innerWidth > 768) {
-        const lerp = isLocked ? 0.14 : 0.1;
-        currentIndex += (targetIndex - currentIndex) * lerp;
+      const lerp = isLocked ? 0.14 : 0.1;
+      currentIndex += (targetIndex - currentIndex) * lerp;
 
-        if (Math.abs(targetIndex - currentIndex) < 0.001) {
-          currentIndex = targetIndex;
-        }
-
-        const activeIndex = Math.min(Math.round(currentIndex), totalItems - 1);
-        const targetOffset = itemOffsets[activeIndex] ?? 0;
-        displayOffset += (targetOffset - displayOffset) * lerp;
-
-        textTrack.style.transform = `translate3d(0, ${-displayOffset}px, 0)`;
-        applyItemStates();
+      if (Math.abs(targetIndex - currentIndex) < 0.001) {
+        currentIndex = targetIndex;
       }
+
+      const activeIndex = Math.min(Math.round(currentIndex), totalItems - 1);
+      const targetOffset = itemOffsets[activeIndex] ?? 0;
+      displayOffset += (targetOffset - displayOffset) * lerp;
+
+      textTrack.style.transform = `translate3d(0, ${-displayOffset}px, 0)`;
+      applyItemStates();
 
       requestAnimationFrame(labRenderLoop);
     }
 
     function setTrackHeight() {
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
-        track.style.height = 'auto';
-        viewport.style.height = 'auto';
-        textTrack.style.transform = '';
-        items.forEach((item, i) => {
-          item.classList.toggle('is-active', i === 0);
-          item.classList.remove('is-locked');
-        });
-        return;
-      }
-
       measureItems();
       track.style.height = `${window.innerHeight + getScrollableVh() * window.innerHeight}px`;
       currentIndex = targetIndex;
@@ -835,8 +939,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateScrollText() {
-      if (window.innerWidth <= 768) return;
-
       const rect = track.getBoundingClientRect();
       const scrollable = rect.height - window.innerHeight;
       if (scrollable <= 0) return;

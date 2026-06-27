@@ -1579,6 +1579,267 @@ body {
   z-index: 25;
 }
 
+/* ── Exploding Photo Stacks ───────────────────────── */
+.photo-stack {
+  --photo-w: clamp(190px, 28vw, 250px);
+  position: relative;
+  width: min(100%, 1120px);
+  min-height: clamp(360px, 52vw, 560px);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.photo-stack::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(64vw, 720px);
+  height: min(42vw, 420px);
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 50% 52%, rgba(255, 255, 255, 0.16), transparent 58%),
+    radial-gradient(circle at 40% 45%, rgba(255, 255, 255, 0.08), transparent 42%);
+  filter: blur(34px);
+  opacity: 0.38;
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.photo-stack.is-exploded::before {
+  opacity: 0.72;
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.photo-stack-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.stack-photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--photo-w);
+  aspect-ratio: 0.78;
+  padding: 10px 10px 34px;
+  border: 1px solid #e8e2d3;
+  border-radius: 2px;
+  background: #f7f1e3;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.42),
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -18px 28px rgba(0, 0, 0, 0.08) inset;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--collapsed-x), var(--collapsed-y))
+    rotate(var(--collapsed-rot));
+  transform-origin: center 58%;
+  transition:
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s ease,
+    filter 0.45s ease,
+    opacity 0.45s ease;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  will-change: transform;
+}
+
+.stack-photo:nth-child(1) { z-index: 9; transition-delay: 0ms; }
+.stack-photo:nth-child(2) { z-index: 8; transition-delay: 22ms; }
+.stack-photo:nth-child(3) { z-index: 7; transition-delay: 44ms; }
+.stack-photo:nth-child(4) { z-index: 6; transition-delay: 66ms; }
+.stack-photo:nth-child(5) { z-index: 5; transition-delay: 88ms; }
+.stack-photo:nth-child(6) { z-index: 4; transition-delay: 110ms; }
+.stack-photo:nth-child(7) { z-index: 3; transition-delay: 132ms; }
+.stack-photo:nth-child(8) { z-index: 2; transition-delay: 154ms; }
+.stack-photo:nth-child(9) { z-index: 1; transition-delay: 176ms; }
+
+.stack-photo::before,
+.stack-photo::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.stack-photo::before {
+  left: 50%;
+  top: -12px;
+  width: 74px;
+  height: 22px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.stack-photo::after {
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.26) 0 10px, transparent 10px 17px);
+  opacity: 0.22;
+}
+
+.stack-photo img {
+  display: block;
+  width: 100%;
+  height: calc(100% - 22px);
+  object-fit: cover;
+  background: #080808;
+  filter: saturate(0.92) contrast(1.06);
+  pointer-events: none;
+}
+
+.photo-stack:not(.is-exploded):hover .stack-photo,
+.photo-stack:not(.is-exploded):focus-within .stack-photo {
+  transform:
+    translate(-50%, -50%)
+    translate(var(--hover-x), var(--hover-y))
+    rotate(var(--hover-rot))
+    translateZ(24px);
+}
+
+.photo-stack:not(.is-exploded):hover .stack-photo:hover,
+.photo-stack:not(.is-exploded):focus-within .stack-photo:focus-visible {
+  z-index: 20;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--hover-x), calc(var(--hover-y) - 18px))
+    rotate(0deg)
+    translateZ(64px)
+    scale(1.04);
+  box-shadow: 0 34px 70px rgba(0, 0, 0, 0.58);
+}
+
+.photo-stack.is-exploded {
+  min-height: clamp(600px, 74vw, 760px);
+  z-index: 60;
+}
+
+.photo-stack.is-exploded .stack-photo {
+  transform:
+    translate(-50%, -50%)
+    translate(var(--explode-x), var(--explode-y))
+    rotate(var(--explode-rot))
+    scale(0.88);
+  box-shadow:
+    0 28px 58px rgba(0, 0, 0, 0.58),
+    0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -18px 28px rgba(0, 0, 0, 0.08) inset;
+}
+
+.photo-stack.is-exploded .stack-photo:hover,
+.photo-stack.is-exploded .stack-photo:focus-visible {
+  z-index: 70;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--explode-x), calc(var(--explode-y) - 18px))
+    rotate(0deg)
+    scale(0.98);
+}
+
+.photo-stack.is-exploded .stack-photo.is-selected {
+  z-index: 90;
+  transform:
+    translate(-50%, -50%)
+    translate(0, 0)
+    rotate(0deg)
+    scale(1.12);
+  box-shadow:
+    0 44px 90px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 2px 0 rgba(255, 255, 255, 0.7) inset;
+}
+
+.photo-stack-close {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(0.5rem, 2vw, 1.25rem);
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.74);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.48);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(16px) scale(0.86);
+  transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s ease;
+  z-index: 100;
+}
+
+.photo-stack-close::before,
+.photo-stack-close::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 50%;
+  height: 2px;
+  background: #ffffff;
+  transform: rotate(45deg);
+}
+
+.photo-stack-close::after {
+  transform: rotate(-45deg);
+}
+
+.photo-stack.is-exploded .photo-stack-close {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.photo-stack-close:hover,
+.photo-stack-close:focus-visible {
+  background: #ffffff;
+}
+
+.photo-stack-close:hover::before,
+.photo-stack-close:hover::after,
+.photo-stack-close:focus-visible::before,
+.photo-stack-close:focus-visible::after {
+  background: #000000;
+}
+
+@media (max-width: 900px) {
+  .photo-stack {
+    --photo-w: clamp(145px, 32vw, 210px);
+    min-height: 560px;
+  }
+
+  .photo-stack.is-exploded .photo-stack-frame {
+    transform: scale(0.78);
+  }
+}
+
+@media (max-width: 620px) {
+  .photo-stack {
+    --photo-w: clamp(120px, 42vw, 160px);
+    min-height: 470px;
+  }
+
+  .photo-stack.is-exploded {
+    min-height: 560px;
+  }
+
+  .photo-stack.is-exploded .photo-stack-frame {
+    transform: scale(0.58);
+  }
+
+}
+
 /* Hero Polaroid Specifics */
 .hero-polaroid {
   width: clamp(220px, 42vw, 300px);

@@ -28,8 +28,7 @@
         <!-- Top Navigation Bar -->
         <nav class="top-bar" id="top-bar">
             <div class="logo">
-                <img src="../assets/images/logo.svg" alt="anmxlr Logo" class="logo-icon">
-                <span>anmxlr ™</span>
+                <span>anmxlr</span>
             </div>
 
             <a href="../../index.html" class="contact-btn" id="contact-btn">
@@ -149,12 +148,30 @@
                 </p>
             </div>
             <div class="hobby-content">
-                <div class="polaroid travel-polaroid">
-                    <div class="tape-piece tape-top-right"></div>
-                    <div class="polaroid-image-placeholder">
-                        <span class="placeholder-text">[travel photo placeholder]</span>
+                <div class="photo-stack travel-photo-stack" data-photo-stack>
+                    <div class="photo-stack-frame" aria-label="Travel gallery">
+                        <button class="stack-photo" type="button" aria-label="Open travel photo 1"
+                            style="--collapsed-x:-8px; --collapsed-y:4px; --collapsed-rot:-8deg; --hover-x:-92px; --hover-y:18px; --hover-rot:-14deg; --explode-x:-360px; --explode-y:-118px; --explode-rot:-8deg;">
+                            <img src="../assets/images/travel/gallery/travel-01.jpg" alt="Travel memory 1">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open travel photo 2"
+                            style="--collapsed-x:2px; --collapsed-y:-4px; --collapsed-rot:5deg; --hover-x:-48px; --hover-y:-18px; --hover-rot:-5deg; --explode-x:-178px; --explode-y:78px; --explode-rot:6deg;">
+                            <img src="../assets/images/travel/gallery/travel-02.jpg" alt="Travel memory 2">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open travel photo 3"
+                            style="--collapsed-x:10px; --collapsed-y:8px; --collapsed-rot:12deg; --hover-x:0px; --hover-y:-38px; --hover-rot:2deg; --explode-x:0px; --explode-y:-138px; --explode-rot:-2deg;">
+                            <img src="../assets/images/travel/gallery/travel-03.jpg" alt="Travel memory 3">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open travel photo 4"
+                            style="--collapsed-x:-2px; --collapsed-y:12px; --collapsed-rot:-2deg; --hover-x:54px; --hover-y:-14px; --hover-rot:7deg; --explode-x:178px; --explode-y:72px; --explode-rot:-6deg;">
+                            <img src="../assets/images/travel/gallery/travel-04.jpg" alt="Travel memory 4">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open travel photo 5"
+                            style="--collapsed-x:6px; --collapsed-y:0px; --collapsed-rot:8deg; --hover-x:96px; --hover-y:20px; --hover-rot:14deg; --explode-x:360px; --explode-y:-112px; --explode-rot:8deg;">
+                            <img src="../assets/images/travel/gallery/travel-05.jpg" alt="Travel memory 5">
+                        </button>
                     </div>
-                    <div class="polaroid-caption">somewhere far...</div>
+                    <button class="photo-stack-close" type="button" aria-label="Close travel gallery"></button>
                 </div>
             </div>
         </section>
@@ -238,25 +255,58 @@
             </div>
         </section>
 
-        <!-- ── Digital Art Section ────────────────────────────– -->
+        <!-- ── Wildlife and Adventure ────────────────────────────– -->
         <section class="about-content-section hobby-section art-section" id="art-section">
             <img src="../assets/images/about/decor/waves.png" class="decor-image decor-waves" alt="" draggable="false">
             <img src="../assets/images/about/decor/tiger.png" class="decor-image decor-tiger" alt="" draggable="false">
             <div class="section-header">
                 <div class="section-kicker">Hobby // 04</div>
-                <h2 class="section-title">Digital Art & Design</h2>
+                <h2 class="section-title">Adventure and wildlife</h2>
                 <p class="section-description">
-                    Experimenting with digital painting, code sketching, and generative art. Love the overlap of system
-                    architecture and visual creativity.
+                    I love to discover new adventures and encounter wildlife in their natural habitats.
                 </p>
             </div>
             <div class="hobby-content">
-                <div class="polaroid art-polaroid">
-                    <div class="tape-piece tape-top-left"></div>
-                    <div class="polaroid-image-placeholder">
-                        <span class="placeholder-text">[digital art placeholder]</span>
+                <div class="photo-stack wildlife-photo-stack" data-photo-stack>
+                    <div class="photo-stack-frame" aria-label="Wildlife gallery">
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 1"
+                            style="--collapsed-x:-10px; --collapsed-y:8px; --collapsed-rot:-10deg; --hover-x:-122px; --hover-y:30px; --hover-rot:-16deg; --explode-x:-396px; --explode-y:-152px; --explode-rot:-9deg;">
+                            <img src="../assets/images/animal/gallery/animal-01.jpg" alt="Wildlife memory 1">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 2"
+                            style="--collapsed-x:4px; --collapsed-y:-6px; --collapsed-rot:6deg; --hover-x:-88px; --hover-y:-20px; --hover-rot:-9deg; --explode-x:-206px; --explode-y:-170px; --explode-rot:5deg;">
+                            <img src="../assets/images/animal/gallery/animal-02.jpg" alt="Wildlife memory 2">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 3"
+                            style="--collapsed-x:11px; --collapsed-y:6px; --collapsed-rot:13deg; --hover-x:-44px; --hover-y:-48px; --hover-rot:-2deg; --explode-x:-20px; --explode-y:-184px; --explode-rot:-3deg;">
+                            <img src="../assets/images/animal/gallery/animal-03.jpg" alt="Wildlife memory 3">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 4"
+                            style="--collapsed-x:-4px; --collapsed-y:14px; --collapsed-rot:-3deg; --hover-x:2px; --hover-y:-58px; --hover-rot:4deg; --explode-x:176px; --explode-y:-164px; --explode-rot:7deg;">
+                            <img src="../assets/images/animal/gallery/animal-04.jpg" alt="Wildlife memory 4">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 5"
+                            style="--collapsed-x:8px; --collapsed-y:0px; --collapsed-rot:9deg; --hover-x:54px; --hover-y:-40px; --hover-rot:10deg; --explode-x:386px; --explode-y:-126px; --explode-rot:-7deg;">
+                            <img src="../assets/images/animal/gallery/animal-05.jpg" alt="Wildlife memory 5">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 6"
+                            style="--collapsed-x:-6px; --collapsed-y:-2px; --collapsed-rot:-6deg; --hover-x:-96px; --hover-y:80px; --hover-rot:-11deg; --explode-x:-330px; --explode-y:74px; --explode-rot:8deg;">
+                            <img src="../assets/images/animal/gallery/animal-06.jpg" alt="Wildlife memory 6">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 7"
+                            style="--collapsed-x:2px; --collapsed-y:10px; --collapsed-rot:3deg; --hover-x:-28px; --hover-y:92px; --hover-rot:-3deg; --explode-x:-116px; --explode-y:118px; --explode-rot:-6deg;">
+                            <img src="../assets/images/animal/gallery/animal-07.jpg" alt="Wildlife memory 7">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 8"
+                            style="--collapsed-x:12px; --collapsed-y:12px; --collapsed-rot:15deg; --hover-x:42px; --hover-y:92px; --hover-rot:5deg; --explode-x:112px; --explode-y:112px; --explode-rot:4deg;">
+                            <img src="../assets/images/animal/gallery/animal-08.jpg" alt="Wildlife memory 8">
+                        </button>
+                        <button class="stack-photo" type="button" aria-label="Open wildlife photo 9"
+                            style="--collapsed-x:-2px; --collapsed-y:4px; --collapsed-rot:0deg; --hover-x:104px; --hover-y:72px; --hover-rot:13deg; --explode-x:326px; --explode-y:82px; --explode-rot:-4deg;">
+                            <img src="../assets/images/animal/gallery/animal-09.jpg" alt="Wildlife memory 9">
+                        </button>
                     </div>
-                    <div class="polaroid-caption">pixels & vectors</div>
+                    <button class="photo-stack-close" type="button" aria-label="Close wildlife gallery"></button>
                 </div>
             </div>
         </section>
@@ -338,31 +388,14 @@
                     </div>
                 </div>
 
-                <div class="sidequest-item item-center surfing-item">
-                    <div class="sidequest-num">[05]</div>
-                    <div class="sidequest-body">
-                        <div class="sidequest-label">Sidequest</div>
-                        <h3 class="sidequest-title">Surfing & Waves</h3>
-                        <p class="sidequest-description">
-                            Catching waves and getting away from the screen. Balance, patience, and ocean flow.
-                        </p>
-                        <div class="polaroid surfing-polaroid">
-                            <div class="tape-piece tape-top-right"></div>
-                            <div class="polaroid-image-placeholder">
-                                <span class="placeholder-text">[surfing photo placeholder]</span>
-                            </div>
-                            <div class="polaroid-caption">ocean therapy</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
         <!-- ── Minecraft Mini Game Section ────────────────────────────– -->
         <section class="about-content-section" id="minecraft-section">
             <div class="section-header">
-                <div class="section-kicker">Mini Game</div>
-                <h2 class="section-title">Pocket Miner</h2>
+                <div class="section-kicker">mini minecraft</div>
+                <h2 class="section-title">Mindcraft</h2>
                 <p class="section-description">
                     A tiny, lightweight clicker game. Click the block to mine resources, upgrade your tools, and craft
                     the Nether Star!
@@ -452,30 +485,30 @@
                     <span class="plate-status">[/]</span>
                     <div class="plate-body">
                         <div class="plate-header">
-                            <span class="plate-title">Design System</span>
-                            <span class="plate-subtitle">React Components</span>
+                            <span class="plate-title">AI System</span>
+                            <span class="plate-subtitle">Learning about new AI stuff</span>
                         </div>
-                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ [65%]</span>
+                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ </span>
                     </div>
                 </div>
                 <div class="plate-item">
                     <span class="plate-status">[/]</span>
                     <div class="plate-body">
                         <div class="plate-header">
-                            <span class="plate-title">Three.js / 3D Graphics</span>
-                            <span class="plate-subtitle">Web Graphics Exploration</span>
+                            <span class="plate-title">Robotics</span>
+                            <span class="plate-subtitle">Integrating Mechanics and AI</span>
                         </div>
-                        <span class="plate-progress">▮▮▮▮▯? ? ? [45%]</span>
+                        <span class="plate-progress">▮▮▮▮▯? ? ? </span>
                     </div>
                 </div>
                 <div class="plate-item">
-                    <span class="plate-status">[ ]</span>
+                    <span class="plate-status">[/]</span>
                     <div class="plate-body">
                         <div class="plate-header">
-                            <span class="plate-title">AI Integrations</span>
+                            <span class="plate-title">Exploring the world</span>
                             <span class="plate-subtitle">Exploring LLM APIs</span>
                         </div>
-                        <span class="plate-progress">▮▮▮▮▮▯? ? ? [50%]</span>
+                        <span class="plate-progress">▮▮▮▮▮▯? ? ? </span>
                     </div>
                 </div>
                 <div class="plate-item">
@@ -485,7 +518,7 @@
                             <span class="plate-title">Personal Branding</span>
                             <span class="plate-subtitle">Content & Community</span>
                         </div>
-                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ [55%]</span>
+                        <span class="plate-progress">▮▮▮▮▮▮▯▯▯ </span>
                     </div>
                 </div>
             </div>
