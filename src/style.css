@@ -796,6 +796,11 @@ body.scroll-locked {
   opacity: 1;
 }
 
+.change-wrapper.cursor-off .typewriter-cursor {
+  opacity: 0;
+  animation: none;
+}
+
 /* Cool glowing cursor for typewriter */
 @keyframes blinkCursor {
 
@@ -2352,12 +2357,8 @@ project-card {
 
 .education-title::after,
 .experience-title::after {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 2px;
-  background: #ffffff;
-  margin-top: 12px;
+  display: none;
+  content: none;
 }
 
 .section-lede {
@@ -2386,46 +2387,14 @@ project-card {
 }
 
 .timeline-dot {
-  position: absolute;
-  left: 0;
-  top: 0.72rem;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 0;
-  outline: 1px solid rgba(255, 255, 255, 0.24);
-  outline-offset: 7px;
-  transition: background-color 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
-  z-index: 2;
-}
-
-.timeline-dot::before {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 18px;
-  width: 1px;
-  height: calc(100% + clamp(2.5rem, 6vw, 5.5rem));
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), transparent);
-  pointer-events: none;
-}
-
-.timeline-item:last-child .timeline-dot::before {
   display: none;
-}
-
-.timeline-item:hover .timeline-dot {
-  background: #ffffff;
-  transform: scale(1.2);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
 .timeline-content {
   position: relative;
   padding: 0 0 clamp(1.4rem, 3vw, 2rem);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
+  border-bottom: 0;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   display: grid;
   grid-template-columns: minmax(72px, 0.18fr) minmax(0, 1fr);
   gap: clamp(1.2rem, 4vw, 3.5rem);
@@ -2499,7 +2468,6 @@ project-card {
 
 .timeline-item:hover .timeline-content {
   transform: translateX(10px);
-  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .timeline-header {
@@ -2555,19 +2523,18 @@ project-card {
 }
 
 .timeline-tags span {
-  padding: 0 0 0.35rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0;
+  border-bottom: 0;
   color: rgba(255, 255, 255, 0.48);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  transition: color 0.25s ease, border-color 0.25s ease;
+  transition: color 0.25s ease;
 }
 
 .timeline-item:hover .timeline-tags span {
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ── Responsive ──────────────────────────────────── */

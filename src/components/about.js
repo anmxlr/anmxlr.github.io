@@ -1004,6 +1004,11 @@ function startAboutPage() {
     const upgradeBtn = document.getElementById('mc-upgrade-btn');
     const upgradeCostEl = document.getElementById('mc-upgrade-cost');
     const toolInfoEl = document.getElementById('mc-tool-info');
+    const mobileToolEl = document.getElementById('mc-mobile-tool');
+    const mobileToolImg = document.getElementById('mc-mobile-tool-img');
+    const mobileToolNameEl = document.getElementById('mc-mobile-tool-name');
+    const touchToolEl = document.getElementById('mc-touch-tool');
+    const touchToolImg = document.getElementById('mc-touch-tool-img');
     
     if (!blockEl) return;
     
@@ -1016,6 +1021,16 @@ function startAboutPage() {
       { name: 'Diamond Pickaxe', power: 16 },
       { name: 'Netherite Pickaxe', power: 30 },
       { name: 'Enchanted Netherite Pickaxe', power: 50 } // Tier 6 retains Netherite power
+    ];
+
+    const toolIcons = [
+      '',
+      '../assets/images/minecraft/Wooden_Pickaxe_JE3_BE3.webp',
+      '../assets/images/minecraft/Iron_Pickaxe_JE3_BE2.webp',
+      '../assets/images/minecraft/Golden_Pickaxe_JE4_BE3.webp',
+      '../assets/images/minecraft/Diamond_Pickaxe_JE3_BE3.webp',
+      '../assets/images/minecraft/Netherite_Pickaxe_JE3.webp',
+      '../assets/images/minecraft/Enchanted_Netherite_Pickaxe.webp'
     ];
     
     const upgradeCosts = [
@@ -1466,6 +1481,33 @@ function startAboutPage() {
     function saveState() {
       localStorage.setItem('mc_pocket_miner_state', JSON.stringify(state));
     }
+
+    function setToolVisual(container, imgEl, tier) {
+      if (!container || !imgEl) return;
+      const icon = toolIcons[tier] || '';
+      container.classList.toggle('has-image', !!icon);
+      if (icon) {
+        imgEl.src = icon;
+      } else {
+        imgEl.removeAttribute('src');
+      }
+    }
+
+    function updateMobileTool() {
+      const currentTool = tools[state.tier];
+      if (mobileToolNameEl) {
+        mobileToolNameEl.textContent = state.tier === 6 ? 'Portal Tool' : currentTool.name;
+      }
+      setToolVisual(mobileToolEl, mobileToolImg, state.tier);
+      setToolVisual(touchToolEl, touchToolImg, state.tier);
+    }
+
+    function animateTouchTool() {
+      if (!touchToolEl) return;
+      touchToolEl.classList.remove('swing');
+      void touchToolEl.offsetWidth;
+      touchToolEl.classList.add('swing');
+    }
     
     function updateUI() {
       document.getElementById('mc-count-cobble').textContent = state.inventory.cobble;
@@ -1476,6 +1518,7 @@ function startAboutPage() {
       
       const currentTool = tools[state.tier];
       toolInfoEl.textContent = state.tier === 6 ? "Nether Portal Active" : `Tool: ${currentTool.name} (Power: ${currentTool.power})`;
+      updateMobileTool();
       
       if (state.tier === 6) {
         upgradeBtn.disabled = false;
@@ -1566,6 +1609,7 @@ function startAboutPage() {
     }
 
     blockEl.addEventListener('click', () => {
+      animateTouchTool();
       if (state.tier === 6) {
         enterNetherPortal();
         return;

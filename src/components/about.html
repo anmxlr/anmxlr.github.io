@@ -407,9 +407,21 @@
                     <!-- Screen Area -->
                     <div class="mc-screen">
                         <div class="mc-block-container">
+                            <div class="mc-mobile-tool" id="mc-mobile-tool" aria-live="polite">
+                                <span class="mc-mobile-tool-label">Tool</span>
+                                <span class="mc-mobile-tool-visual" id="mc-mobile-tool-visual">
+                                    <span class="mc-mobile-tool-hand">HAND</span>
+                                    <img id="mc-mobile-tool-img" alt="" draggable="false">
+                                </span>
+                                <span class="mc-mobile-tool-name" id="mc-mobile-tool-name">Hand</span>
+                            </div>
                             <div class="mc-block" id="mc-active-block">
                                 <div class="mc-block-cracks" id="mc-block-cracks"></div>
                                 <span class="mc-block-symbol" id="mc-block-symbol">🪨</span>
+                            </div>
+                            <div class="mc-touch-tool" id="mc-touch-tool" aria-hidden="true">
+                                <span class="mc-touch-tool-hand">HAND</span>
+                                <img id="mc-touch-tool-img" alt="" draggable="false">
                             </div>
                         </div>
                         <div class="mc-screen-stats">

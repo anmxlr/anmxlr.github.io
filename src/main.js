@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typewriterText) typewriterText.textContent = '';
+    wrapper.classList.remove('cursor-off');
     wrapper.style.setProperty('--typewriter-width', '0px');
     wrapper.style.width = `${strike.offsetWidth}px`;
     setTimeout(() => wrapper.classList.add('cut'), 1200);
@@ -222,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(type, 50 + Math.random() * 40);
       } else {
         document.body.removeChild(tempSpan);
+        setTimeout(() => wrapper.classList.add('cursor-off'), 2000);
       }
     }
 
